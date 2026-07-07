@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>FAMITORY SFX Tool</title>
+<style>
+  :root {
+    --bg: #1a1a24;
+    --panel: #24242f;
+    --panel2: #2f2f3d;
+    --text: #e0e0e8;
+    --dim: #8888a0;
+    --accent: #6de08a;
+    --accent2: #4dd0e1;
+    --danger: #ff6b6b;
+    --border: #3a3a4a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 20px;
+    background: var(--bg); color: var(--text);
+    font-family: 'Consolas', 'Menlo', monospace;
+    font-size: 13px;
+  }
+  h1 { margin: 0 0 12px; font-size: 18px; color: var(--accent); }
+  .subtitle { color: var(--dim); margin-bottom: 20px; font-size: 12px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 0; }
+  .tab {
+    padding: 8px 16px; background: var(--panel); border: 1px solid var(--border);
+    border-bottom: none; cursor: pointer; color: var(--dim);
+    border-radius: 6px 6px 0 0;
+  }
+  .tab.active { background: var(--panel2); color: var(--accent); }
+  .panel {
+    background: var(--panel2); border: 1px solid var(--border);
+    padding: 20px; border-radius: 0 8px 8px 8px;
+  }
+  .row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .row label {
+    display: inline-block; width: 130px; color: var(--dim); font-size: 12px;
+  }
+  .row input[type="range"] { flex: 1; }
+  .row input[type="number"], .row select {
+    width: 90px; padding: 4px 6px; background: var(--bg);
+    color: var(--text); border: 1px solid var(--border); border-radius: 4px;
+    font-family: inherit; font-size: 12px;
+  }
+  .row select { width: 120px; }
+  .btn {
+    padding: 8px 16px; background: var(--accent); color: #000;
+    border: none; border-radius: 4px; cursor: pointer;
+    font-family: inherit; font-weight: bold; font-size: 13px;
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .btn.secondary { background: var(--accent2); }
+  .btn.danger { background: var(--danger); color: #fff; }
+  .btn.small { padding: 4px 10px; font-size: 11px; }
+  .btn-row { display: flex; gap: 8px; margin: 16px 0 0; flex-wrap: wrap; }
+  .output {
+    margin-top: 16px; background: var(--bg); padding: 12px;
+    border-radius: 4px; border: 1px solid var(--border);
+    font-size: 12px; white-space: pre-wrap; word-break: break-all;
+    color: var(--accent);
+  }
+  .notes-list {
+    background: var(--bg); border: 1px solid var(--border);
+    padding: 8px; border-radius: 4px; margin-top: 4px;
+  }
+  .note-row {
+    display: flex; gap: 6px; align-items: center; margin-bottom: 4px;
+  }
+  .note-row input { width: 70px; padding: 3px 5px; background: var(--panel2);
+    color: var(--text); border: 1px solid var(--border); border-radius: 3px;
+    font-family: inherit; font-size: 11px; }
+  .note-row .idx { width: 24px; color: var(--dim); font-size: 11px; }
+  .hint { color: var(--dim); font-size: 11px; margin-top: 4px; }
+  .preset-bar {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+    padding: 10px; background: var(--bg); border-radius: 4px;
+  }
+  .preset-bar select { flex: 1; }
+  .toast {
+    position: fixed; top: 20px; right: 20px; background: var(--accent);
+    color: #000; padding: 8px 16px; border-radius: 4px; font-weight: bold;
+    opacity: 0; transition: opacity 0.2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<h1>FAMITORY SFX Tool</h1>
+<div class="subtitle">FAMITORY互換の効果音パラメータをこの場で生成・試聴・コピー。</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="sweep">FreqSweep（スイープ）</div>
+  <div class="tab" data-tab="multi">MultiNote（メロディ）</div>
+  <div class="tab" data-tab="noise">NoiseSE（ノイズ）</div>
+</div>
+
+<!-- =============== FreqSweep =============== -->
+<div class="panel" id="panel-sweep">
+  <div class="preset-bar">
+    <label style="color:var(--dim);">プリセット:</label>
+    <select id="sw-preset"></select>
+    <button class="btn small secondary" onclick="loadPreset('sweep')">読込</button>
+  </div>
+
+  <div class="row">
+    <label>startFreq (Hz)</label>
+    <input type="range" id="sw-startFreq" min="20" max="4000" step="1" value="200">
+    <input type="number" id="sw-startFreq-n" value="200">
+  </div>
+  <div class="row">
+    <label>endFreq (Hz)</label>
+    <input type="range" id="sw-endFreq" min="20" max="4000" step="1" value="600">
+    <input type="number" id="sw-endFreq-n" value="600">
+  </div>
+  <div class="row">
+    <label id="sw-duration-label">duration (秒)</label>
+    <input type="range" id="sw-duration" min="0.01" max="1" step="0.005" value="0.1">
+    <input type="number" id="sw-duration-n" step="0.005" value="0.1">
+  </div>
+  <div class="row">
+    <label>repeatCount</label>
+    <input type="range" id="sw-repeatCount" min="1" max="20" step="1" value="1">
+    <input type="number" id="sw-repeatCount-n" value="1">
+  </div>
+  <div class="hint" id="sw-total-hint" style="margin-left:142px; display:none;">
+    総時間 = segmentDuration × repeatCount = <span id="sw-total">0.00</span> 秒
+  </div>
+  <div class="row">
+    <label>waveType</label>
+    <select id="sw-waveType">
+      <option value="square">square</option>
+      <option value="sine">sine</option>
+      <option value="triangle">triangle</option>
+      <option value="sawtooth">sawtooth</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>duty（squareのみ）</label>
+    <select id="sw-duty">
+      <option value="">なし（50%）</option>
+      <option value="0.125">0.125 (12.5%)</option>
+      <option value="0.25">0.25 (25%)</option>
+      <option value="0.5">0.5 (50%)</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>startGain</label>
+    <input type="range" id="sw-startGain" min="0.01" max="1" step="0.01" value="0.2">
+    <input type="number" id="sw-startGain-n" step="0.01" value="0.2">
+  </div>
+  <div class="row">
+    <label>envelopeType</label>
+    <select id="sw-envelopeType">
+      <option value="exponential">exponential</option>
+      <option value="linear">linear</option>
+    </select>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="playSweep()">▶ 再生</button>
+    <button class="btn secondary" onclick="copyOutput('sweep')">📋 JSONコピー</button>
+    <button class="btn small" onclick="randomize('sweep')">🎲 ランダム</button>
+  </div>
+  <div class="output" id="sw-output"></div>
+</div>
+
+<!-- =============== MultiNote =============== -->
+<div class="panel" id="panel-multi" style="display:none;">
+  <div class="preset-bar">
+    <label style="color:var(--dim);">プリセット:</label>
+    <select id="mn-preset"></select>
+    <button class="btn small secondary" onclick="loadPreset('multi')">読込</button>
+  </div>
+
+  <div class="row">
+    <label>waveType</label>
+    <select id="mn-waveType">
+      <option value="square">square</option>
+      <option value="sine">sine</option>
+      <option value="triangle">triangle</option>
+      <option value="sawtooth">sawtooth</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>duty（squareのみ）</label>
+    <select id="mn-duty">
+      <option value="">なし（50%）</option>
+      <option value="0.125">0.125</option>
+      <option value="0.25">0.25</option>
+      <option value="0.5">0.5</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>gain</label>
+    <input type="range" id="mn-gain" min="0.01" max="1" step="0.01" value="0.2">
+    <input type="number" id="mn-gain-n" step="0.01" value="0.2">
+  </div>
+
+  <div class="row" style="align-items: flex-start;">
+    <label>notes</label>
+    <div style="flex:1;">
+      <div class="notes-list" id="mn-notes"></div>
+      <button class="btn small" onclick="addNote()" style="margin-top:6px;">+ 音符追加</button>
+      <div class="hint">freq: 周波数(Hz) / dur: 長さ(秒) / gap: 次の音符までの間(秒)</div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="playMulti()">▶ 再生</button>
+    <button class="btn secondary" onclick="copyOutput('multi')">📋 JSONコピー</button>
+    <button class="btn small" onclick="randomize('multi')">🎲 ランダム</button>
+  </div>
+  <div class="output" id="mn-output"></div>
+</div>
+
+<!-- =============== NoiseSE =============== -->
+<div class="panel" id="panel-noise" style="display:none;">
+  <div class="preset-bar">
+    <label style="color:var(--dim);">プリセット:</label>
+    <select id="ns-preset"></select>
+    <button class="btn small secondary" onclick="loadPreset('noise')">読込</button>
+  </div>
+
+  <div class="row">
+    <label>duration (秒)</label>
+    <input type="range" id="ns-duration" min="0.01" max="2" step="0.005" value="0.1">
+    <input type="number" id="ns-duration-n" step="0.005" value="0.1">
+  </div>
+  <div class="row">
+    <label>startGain</label>
+    <input type="range" id="ns-startGain" min="0.01" max="1" step="0.01" value="0.2">
+    <input type="number" id="ns-startGain-n" step="0.01" value="0.2">
+  </div>
+  <div class="row">
+    <label>sustainPunch</label>
+    <input type="range" id="ns-sustainPunch" min="0" max="2" step="0.05" value="0">
+    <input type="number" id="ns-sustainPunch-n" step="0.05" value="0">
+  </div>
+  <div class="row">
+    <label>filterFreq (Hz)</label>
+    <input type="range" id="ns-filterFreq" min="0" max="4000" step="10" value="0">
+    <input type="number" id="ns-filterFreq-n" step="10" value="0">
+  </div>
+  <div class="row">
+    <label>filterSweep (Hz)</label>
+    <input type="range" id="ns-filterSweep" min="-4000" max="4000" step="10" value="0">
+    <input type="number" id="ns-filterSweep-n" step="10" value="0">
+  </div>
+  <div class="row">
+    <label>pitchJump (Hz)</label>
+    <input type="range" id="ns-pitchJump" min="0" max="4000" step="10" value="0">
+    <input type="number" id="ns-pitchJump-n" step="10" value="0">
+  </div>
+  <div class="hint" style="margin-left:142px;">filterFreq=0のとき LPFなし（既存SEと互換）</div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="playNoise()">▶ 再生</button>
+    <button class="btn secondary" onclick="copyOutput('noise')">📋 JSONコピー</button>
+    <button class="btn small" onclick="randomize('noise')">🎲 ランダム</button>
+  </div>
+  <div class="output" id="ns-output"></div>
+</div>
+
+<div class="toast" id="toast">コピーしました</div>
+
+<script>
+// ================================================================
+// Audio Engine
+// ================================================================
+const Audio = {
+  ctx: null, masterGain: null, waveCache: {},
+  ensureContext() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.value = 0.3;
+      this.masterGain.connect(this.ctx.destination);
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  _pulseWave(duty) {
+    const key = `pulse_${duty}`;
+    if (!this.waveCache[key]) {
+      const n = 4096;
+      const real = new Float32Array(n);
+      const imag = new Float32Array(n);
+      for (let i = 1; i < n; i++) imag[i] = (2 / (i * Math.PI)) * Math.sin(i * Math.PI * duty);
+      this.waveCache[key] = this.ctx.createPeriodicWave(real, imag);
+    }
+    return this.waveCache[key];
+  },
+  playFreqSweep(config) {
+    this.ensureContext();
+    const { startFreq, endFreq, duration = 0.1, waveType = 'square',
+      duty = null, startGain = 0.2, envelopeType = 'exponential' } = config;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    if (duty && waveType === 'square') osc.setPeriodicWave(this._pulseWave(duty));
+    else osc.type = waveType;
+    osc.frequency.setValueAtTime(startFreq, this.ctx.currentTime);
+    if (envelopeType === 'exponential') osc.frequency.exponentialRampToValueAtTime(endFreq, this.ctx.currentTime + duration);
+    else osc.frequency.linearRampToValueAtTime(endFreq, this.ctx.currentTime + duration);
+    const t = this.ctx.currentTime, step = duration / 4;
+    gain.gain.setValueAtTime(startGain, t);
+    gain.gain.setValueAtTime(startGain * 0.6, t + step);
+    gain.gain.setValueAtTime(startGain * 0.25, t + step * 2);
+    gain.gain.setValueAtTime(0.001, t + step * 3);
+    osc.connect(gain); gain.connect(this.masterGain);
+    osc.start(); osc.stop(this.ctx.currentTime + duration);
+  },
+  playRepeatingSweep(config) {
+    this.ensureContext();
+    const { startFreq, endFreq, segmentDuration = 0.08, repeatCount = 6,
+      waveType = 'square', duty = null, startGain = 0.2, envelopeType = 'exponential' } = config;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    if (duty && waveType === 'square') osc.setPeriodicWave(this._pulseWave(duty));
+    else osc.type = waveType;
+    const t0 = this.ctx.currentTime, step = segmentDuration / 4;
+    for (let i = 0; i < repeatCount; i++) {
+      const s = t0 + segmentDuration * i;
+      osc.frequency.setValueAtTime(startFreq, s);
+      if (envelopeType === 'exponential') osc.frequency.exponentialRampToValueAtTime(endFreq, s + segmentDuration);
+      else osc.frequency.linearRampToValueAtTime(endFreq, s + segmentDuration);
+      gain.gain.setValueAtTime(startGain, s);
+      gain.gain.setValueAtTime(startGain * 0.6, s + step);
+      gain.gain.setValueAtTime(startGain * 0.25, s + step * 2);
+      gain.gain.setValueAtTime(0.001, s + step * 3);
+    }
+    const totalDur = segmentDuration * repeatCount;
+    const tail = 0.02;
+    gain.gain.linearRampToValueAtTime(0, t0 + totalDur + tail);
+    osc.connect(gain); gain.connect(this.masterGain);
+    osc.start(t0); osc.stop(t0 + totalDur + tail);
+  },
+  playMultiNote(config) {
+    this.ensureContext();
+    const { notes, waveType = 'square', duty = null, gain = 0.2 } = config;
+    let currentTime = this.ctx.currentTime;
+    notes.forEach(note => {
+      const osc = this.ctx.createOscillator();
+      const gainNode = this.ctx.createGain();
+      if (duty && waveType === 'square') osc.setPeriodicWave(this._pulseWave(duty));
+      else osc.type = waveType;
+      osc.frequency.value = note.freq;
+      const startTime = currentTime, duration = note.duration;
+      currentTime += duration + (note.spacing || 0);
+      const step = duration / 4;
+      gainNode.gain.setValueAtTime(gain, startTime);
+      gainNode.gain.setValueAtTime(gain * 0.6, startTime + step);
+      gainNode.gain.setValueAtTime(gain * 0.25, startTime + step * 2);
+      gainNode.gain.setValueAtTime(0.001, startTime + step * 3);
+      osc.connect(gainNode); gainNode.connect(this.masterGain);
+      osc.start(startTime); osc.stop(startTime + duration);
+    });
+  },
+  playNoiseSE(config) {
+    this.ensureContext();
+    const { duration = 0.1, startGain = 0.2, sustainPunch = 0,
+      filterFreq = 0, filterSweep = 0, pitchJump = 0 } = config;
+    const bufferSize = this.ctx.sampleRate * duration;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    const source = this.ctx.createBufferSource();
+    source.buffer = buffer;
+    const gainNode = this.ctx.createGain();
+    const t = this.ctx.currentTime, step = duration / 4;
+    const peakGain = sustainPunch > 0 ? startGain * (1 + sustainPunch) : startGain;
+    gainNode.gain.setValueAtTime(peakGain, t);
+    gainNode.gain.setValueAtTime(startGain * 0.6, t + step);
+    gainNode.gain.setValueAtTime(startGain * 0.25, t + step * 2);
+    gainNode.gain.setValueAtTime(0.001, t + step * 3);
+    if (filterFreq > 0) {
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(filterFreq + pitchJump, t);
+      if (pitchJump > 0) filter.frequency.linearRampToValueAtTime(filterFreq, t + 0.02);
+      filter.frequency.linearRampToValueAtTime(Math.max(20, filterFreq + filterSweep), t + duration);
+      source.connect(filter); filter.connect(gainNode);
+    } else {
+      source.connect(gainNode);
+    }
+    gainNode.connect(this.masterGain);
+    source.start(t); source.stop(t + duration);
+  }
+};
+
+// ================================================================
+// Presets
+// ================================================================
+const PRESETS = {
+  sweep: {
+    // repeatCount省略=1 → playFreqSweep, 2以上 → playRepeatingSweep
+    'jump_01':         { startFreq: 200, endFreq: 600, duration: 0.1, waveType: 'square' },
+    'jump_02':         { startFreq: 300, endFreq: 900, duration: 0.08, waveType: 'square' },
+    'jump_03':         { startFreq: 250, endFreq: 500, duration: 0.1, waveType: 'square', duty: 0.25 },
+    'jump_05':         { startFreq: 400, endFreq: 1000, duration: 0.1, waveType: 'square', startGain: 0.15 },
+    'attack_01':       { startFreq: 400, endFreq: 100, duration: 0.06, waveType: 'square', duty: 0.25 },
+    'attack_02':       { startFreq: 800, endFreq: 200, duration: 0.06, waveType: 'square', duty: 0.125 },
+    'attack_04':       { startFreq: 600, endFreq: 150, duration: 0.06, waveType: 'square' },
+    'attack_05':       { startFreq: 1200, endFreq: 400, duration: 0.08, waveType: 'square', duty: 0.25 },
+    'damage_01':       { startFreq: 400, endFreq: 100, duration: 0.15, waveType: 'square' },
+    'damage_02':       { startFreq: 300, endFreq: 80, duration: 0.1, waveType: 'square' },
+    'damage_03':       { startFreq: 200, endFreq: 50, duration: 0.15, waveType: 'square' },
+    'damage_05':       { startFreq: 500, endFreq: 60, duration: 0.12, waveType: 'square', duty: 0.25 },
+    'other_blip↑':    { startFreq: 440, endFreq: 880, duration: 0.05, waveType: 'square', startGain: 0.15 },
+    'other_blip↓':    { startFreq: 440, endFreq: 220, duration: 0.05, waveType: 'square', startGain: 0.15 },
+    'other_tick':      { startFreq: 660, endFreq: 660, duration: 0.03, waveType: 'square', startGain: 0.1 },
+    'other_beep':      { startFreq: 330, endFreq: 330, duration: 0.05, waveType: 'square' },
+    'enemyDefeat':     { startFreq: 600, endFreq: 200, duration: 0.08, waveType: 'square' },
+    'PowerUp (Bfxr風)': { startFreq: 450, endFreq: 900, duration: 0.08, repeatCount: 8, waveType: 'square', duty: 0.125, startGain: 0.2 },
+    'Coin (Bfxr風)':   { startFreq: 700, endFreq: 1400, duration: 0.05, repeatCount: 3, waveType: 'square', duty: 0.25, startGain: 0.2 },
+    '1UP':             { startFreq: 500, endFreq: 1000, duration: 0.07, repeatCount: 6, waveType: 'square', duty: 0.25, startGain: 0.2 },
+    'ChargeUp':        { startFreq: 200, endFreq: 400, duration: 0.1, repeatCount: 5, waveType: 'square', startGain: 0.15 }
+  },
+  multi: {
+    'itemGet_01': { waveType: 'square', gain: 0.2, notes: [{ freq: 523, duration: 0.05 }, { freq: 784, duration: 0.07 }] },
+    'itemGet_03': { waveType: 'square', gain: 0.2, notes: [{ freq: 392, duration: 0.05 }, { freq: 523, duration: 0.07 }] },
+    'itemGet_04': { waveType: 'square', duty: 0.25, gain: 0.5, notes: [{ freq: 523, duration: 0.05 }, { freq: 659, duration: 0.07 }] },
+    'itemGet_05': { waveType: 'square', duty: 0.25, gain: 0.5, notes: [{ freq: 880, duration: 0.03 }, { freq: 1320, duration: 0.035, spacing: 0.002 }] }
+  },
+  noise: {
+    'attack_03':        { duration: 0.05, startGain: 0.3 },
+    'damage_04':        { duration: 0.1, startGain: 0.2 },
+    'other_05':         { duration: 0.15, startGain: 0.4 },
+    'Boom (Bfxr風)':   { duration: 0.45, startGain: 0.3, sustainPunch: 0.5, filterFreq: 600, filterSweep: -500, pitchJump: 800 },
+    'Hit重め':          { duration: 0.2, startGain: 0.25, sustainPunch: 0.3, filterFreq: 1000, filterSweep: -800 },
+    'Explosion':        { duration: 0.6, startGain: 0.4, sustainPunch: 0.8, filterFreq: 400, filterSweep: -350, pitchJump: 600 }
+  }
+};
+
+// ================================================================
+// Tabs
+// ================================================================
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    ['sweep','multi','noise'].forEach(id => {
+      document.getElementById('panel-' + id).style.display = 'none';
+    });
+    document.getElementById('panel-' + tab.dataset.tab).style.display = '';
+  });
+});
+
+// ================================================================
+// Slider <-> Number 同期
+// ================================================================
+function syncPair(rangeId, numberId) {
+  const r = document.getElementById(rangeId);
+  const n = document.getElementById(numberId);
+  r.addEventListener('input', () => { n.value = r.value; updateOutput(); });
+  n.addEventListener('input', () => { r.value = n.value; updateOutput(); });
+}
+['sw-startFreq','sw-endFreq','sw-duration','sw-repeatCount','sw-startGain'].forEach(id => syncPair(id, id + '-n'));
+['mn-gain'].forEach(id => syncPair(id, id + '-n'));
+['ns-duration','ns-startGain','ns-sustainPunch','ns-filterFreq','ns-filterSweep','ns-pitchJump'].forEach(id => syncPair(id, id + '-n'));
+['sw-waveType','sw-duty','sw-envelopeType','mn-waveType','mn-duty'].forEach(id => {
+  document.getElementById(id).addEventListener('change', updateOutput);
+});
+
+// ================================================================
+// Preset dropdowns
+// ================================================================
+function fillPresets() {
+  const map = { sweep: 'sw-preset', multi: 'mn-preset', noise: 'ns-preset' };
+  Object.entries(map).forEach(([kind, selId]) => {
+    const sel = document.getElementById(selId);
+    Object.keys(PRESETS[kind]).forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      sel.appendChild(opt);
+    });
+  });
+}
+fillPresets();
+
+function loadPreset(kind) {
+  if (kind === 'sweep') {
+    const name = document.getElementById('sw-preset').value;
+    const p = PRESETS.sweep[name];
+    setV('sw-startFreq', p.startFreq);
+    setV('sw-endFreq', p.endFreq ?? p.startFreq);
+    setV('sw-duration', p.duration ?? 0.1);
+    setV('sw-repeatCount', p.repeatCount ?? 1);
+    document.getElementById('sw-waveType').value = p.waveType ?? 'square';
+    document.getElementById('sw-duty').value = p.duty ?? '';
+    setV('sw-startGain', p.startGain ?? 0.2);
+    document.getElementById('sw-envelopeType').value = p.envelopeType ?? 'exponential';
+  } else if (kind === 'multi') {
+    const name = document.getElementById('mn-preset').value;
+    const p = PRESETS.multi[name];
+    document.getElementById('mn-waveType').value = p.waveType ?? 'square';
+    document.getElementById('mn-duty').value = p.duty ?? '';
+    setV('mn-gain', p.gain ?? 0.2);
+    setNotes(p.notes);
+  } else if (kind === 'noise') {
+    const name = document.getElementById('ns-preset').value;
+    const p = PRESETS.noise[name];
+    setV('ns-duration', p.duration ?? 0.1);
+    setV('ns-startGain', p.startGain ?? 0.2);
+    setV('ns-sustainPunch', p.sustainPunch ?? 0);
+    setV('ns-filterFreq', p.filterFreq ?? 0);
+    setV('ns-filterSweep', p.filterSweep ?? 0);
+    setV('ns-pitchJump', p.pitchJump ?? 0);
+  }
+  updateOutput();
+}
+function setV(id, v) {
+  document.getElementById(id).value = v;
+  const n = document.getElementById(id + '-n');
+  if (n) n.value = v;
+}
+
+// ================================================================
+// MultiNote 音符管理
+// ================================================================
+let notes = [{ freq: 523, duration: 0.05, spacing: 0 }, { freq: 784, duration: 0.07, spacing: 0 }];
+function renderNotes() {
+  const box = document.getElementById('mn-notes');
+  box.innerHTML = '';
+  notes.forEach((note, i) => {
+    const row = document.createElement('div');
+    row.className = 'note-row';
+    row.innerHTML = `
+      <span class="idx">#${i+1}</span>
+      <span style="color:var(--dim);font-size:11px;">freq</span>
+      <input type="number" value="${note.freq}" data-i="${i}" data-k="freq">
+      <span style="color:var(--dim);font-size:11px;">dur</span>
+      <input type="number" step="0.005" value="${note.duration}" data-i="${i}" data-k="duration">
+      <span style="color:var(--dim);font-size:11px;">gap</span>
+      <input type="number" step="0.005" value="${note.spacing || 0}" data-i="${i}" data-k="spacing">
+      <button class="btn small danger" onclick="removeNote(${i})">×</button>
+    `;
+    box.appendChild(row);
+  });
+  box.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const i = +e.target.dataset.i, k = e.target.dataset.k;
+      notes[i][k] = parseFloat(e.target.value) || 0;
+      updateOutput();
+    });
+  });
+}
+function addNote() { notes.push({ freq: 440, duration: 0.05, spacing: 0 }); renderNotes(); updateOutput(); }
+function removeNote(i) { notes.splice(i,1); renderNotes(); updateOutput(); }
+function setNotes(arr) {
+  notes = arr.map(n => ({ freq: n.freq, duration: n.duration, spacing: n.spacing || 0 }));
+  renderNotes();
+}
+renderNotes();
+
+// ================================================================
+// Config 生成
+// ================================================================
+function getSweepConfig() {
+  const repeatCount = +document.getElementById('sw-repeatCount').value;
+  const dur = +document.getElementById('sw-duration').value;
+  const c = {
+    startFreq:  +document.getElementById('sw-startFreq').value,
+    endFreq:    +document.getElementById('sw-endFreq').value,
+    waveType:   document.getElementById('sw-waveType').value,
+    startGain:  +document.getElementById('sw-startGain').value
+  };
+  if (repeatCount > 1) {
+    c.segmentDuration = dur;
+    c.repeatCount = repeatCount;
+  } else {
+    c.duration = dur;
+  }
+  const duty = document.getElementById('sw-duty').value;
+  if (duty) c.duty = +duty;
+  const env = document.getElementById('sw-envelopeType').value;
+  if (env !== 'exponential') c.envelopeType = env;
+  return { repeatCount, config: c };
+}
+function getMultiConfig() {
+  const c = {
+    waveType: document.getElementById('mn-waveType').value,
+    gain: +document.getElementById('mn-gain').value,
+    notes: notes.map(n => {
+      const o = { freq: n.freq, duration: n.duration };
+      if (n.spacing) o.spacing = n.spacing;
+      return o;
+    })
+  };
+  const duty = document.getElementById('mn-duty').value;
+  if (duty) c.duty = +duty;
+  return c;
+}
+function getNoiseConfig() {
+  const c = {
+    duration:  +document.getElementById('ns-duration').value,
+    startGain: +document.getElementById('ns-startGain').value
+  };
+  const sustainPunch = +document.getElementById('ns-sustainPunch').value;
+  const filterFreq   = +document.getElementById('ns-filterFreq').value;
+  const filterSweep  = +document.getElementById('ns-filterSweep').value;
+  const pitchJump    = +document.getElementById('ns-pitchJump').value;
+  if (sustainPunch) c.sustainPunch = sustainPunch;
+  if (filterFreq)   c.filterFreq   = filterFreq;
+  if (filterSweep)  c.filterSweep  = filterSweep;
+  if (pitchJump)    c.pitchJump    = pitchJump;
+  return c;
+}
+
+// ================================================================
+// 再生
+// ================================================================
+function playSweep() {
+  const { repeatCount, config } = getSweepConfig();
+  if (repeatCount > 1) Audio.playRepeatingSweep(config);
+  else Audio.playFreqSweep(config);
+}
+function playMulti() { Audio.playMultiNote(getMultiConfig()); }
+function playNoise() { Audio.playNoiseSE(getNoiseConfig()); }
+
+// ================================================================
+// 出力表示
+// ================================================================
+function updateOutput() {
+  const { repeatCount, config } = getSweepConfig();
+  const label = document.getElementById('sw-duration-label');
+  const hint = document.getElementById('sw-total-hint');
+  if (repeatCount > 1) {
+    label.textContent = 'segmentDuration (秒)';
+    hint.style.display = '';
+    document.getElementById('sw-total').textContent = (config.segmentDuration * repeatCount).toFixed(3);
+    document.getElementById('sw-output').textContent =
+      'this.playRepeatingSweep(' + JSON.stringify(config) + ');';
+  } else {
+    label.textContent = 'duration (秒)';
+    hint.style.display = 'none';
+    document.getElementById('sw-output').textContent =
+      'this.playFreqSweep(' + JSON.stringify(config) + ');';
+  }
+  document.getElementById('mn-output').textContent =
+    'this.playMultiNote(' + JSON.stringify(getMultiConfig()) + ');';
+  document.getElementById('ns-output').textContent =
+    'this.playNoiseSE(' + JSON.stringify(getNoiseConfig()) + ');';
+}
+updateOutput();
+
+// ================================================================
+// コピー・ランダム
+// ================================================================
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = isError ? 'var(--danger)' : 'var(--accent)';
+  t.style.color = isError ? '#fff' : '#000';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1500);
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
+  return ok;
+}
+function copyOutput(kind) {
+  const id = { sweep: 'sw-output', multi: 'mn-output', noise: 'ns-output' }[kind];
+  const text = document.getElementById(id).textContent;
+  const done = () => showToast('コピーしました');
+  const fail = () => {
+    if (fallbackCopy(text)) done();
+    else { window.prompt('Ctrl+C でコピーしてください:', text); showToast('プロンプトから手動コピーしてください', true); }
+  };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(fail);
+  else { if (fallbackCopy(text)) done(); else fail(); }
+}
+function rand(min, max) { return Math.random() * (max - min) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function randomize(kind) {
+  const waves = ['square','square','square','triangle','sawtooth'];
+  const duties = ['', '0.125', '0.25', '0.5'];
+  if (kind === 'sweep') {
+    setV('sw-startFreq', Math.floor(rand(100, 1600)));
+    setV('sw-endFreq',   Math.floor(rand(100, 1600)));
+    setV('sw-duration',  rand(0.03, 0.23).toFixed(3));
+    setV('sw-repeatCount', Math.random() < 0.4 ? Math.floor(rand(2, 10)) : 1);
+    setV('sw-startGain', rand(0.1, 0.4).toFixed(2));
+    document.getElementById('sw-waveType').value = pick(waves);
+    document.getElementById('sw-duty').value = pick(duties);
+    updateOutput();
+    playSweep();
+  } else if (kind === 'multi') {
+    const n = Math.floor(rand(2, 6));
+    notes = [];
+    for (let i = 0; i < n; i++) {
+      notes.push({
+        freq: Math.floor(rand(200, 1500)),
+        duration: +rand(0.03, 0.12).toFixed(3),
+        spacing: Math.random() < 0.3 ? +rand(0.01, 0.04).toFixed(3) : 0
+      });
+    }
+    renderNotes();
+    setV('mn-gain', rand(0.1, 0.4).toFixed(2));
+    document.getElementById('mn-waveType').value = pick(waves);
+    document.getElementById('mn-duty').value = pick(duties);
+    updateOutput();
+    playMulti();
+  } else if (kind === 'noise') {
+    setV('ns-duration',  rand(0.03, 0.5).toFixed(3));
+    setV('ns-startGain', rand(0.1, 0.5).toFixed(2));
+    setV('ns-sustainPunch', Math.random() < 0.5 ? rand(0, 1).toFixed(2) : 0);
+    const useFilter = Math.random() < 0.6;
+    setV('ns-filterFreq',  useFilter ? Math.floor(rand(200, 2000)) : 0);
+    setV('ns-filterSweep', useFilter ? Math.floor(rand(-1500, 500)) : 0);
+    setV('ns-pitchJump',   useFilter && Math.random() < 0.5 ? Math.floor(rand(200, 1000)) : 0);
+    updateOutput();
+    playNoise();
+  }
+}
+</script>
+</body>
+</html>
