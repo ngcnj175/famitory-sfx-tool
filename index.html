@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FAMITORY SFX Tool</title>
 <style>
   :root {
@@ -89,7 +90,6 @@
 </head>
 <body>
 <h1>FAMITORY SFX Tool</h1>
-<div class="subtitle">FAMITORY互換の効果音パラメータをこの場で生成・試聴・コピー。</div>
 
 <div class="tabs">
   <div class="tab active" data-tab="sweep">FreqSweep（スイープ）</div>
@@ -103,6 +103,11 @@
     <label style="color:var(--dim);">プリセット:</label>
     <select id="sw-preset"></select>
     <button class="btn small secondary" onclick="loadPreset('sweep')">読込</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn" onclick="playSweep()">▶ 再生</button>
+    <button class="btn secondary" onclick="copyOutput('sweep')">📋 JSONコピー</button>
+    <button class="btn small" onclick="randomize('sweep')">🎲 ランダム</button>
   </div>
 
   <div class="row">
@@ -159,12 +164,6 @@
     </select>
   </div>
 
-  <div class="btn-row">
-    <button class="btn" onclick="playSweep()">▶ 再生</button>
-    <button class="btn secondary" onclick="copyOutput('sweep')">📋 JSONコピー</button>
-    <button class="btn small" onclick="randomize('sweep')">🎲 ランダム</button>
-  </div>
-  <div class="output" id="sw-output"></div>
 </div>
 
 <!-- =============== MultiNote =============== -->
@@ -173,6 +172,11 @@
     <label style="color:var(--dim);">プリセット:</label>
     <select id="mn-preset"></select>
     <button class="btn small secondary" onclick="loadPreset('multi')">読込</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn" onclick="playMulti()">▶ 再生</button>
+    <button class="btn secondary" onclick="copyOutput('multi')">📋 JSONコピー</button>
+    <button class="btn small" onclick="randomize('multi')">🎲 ランダム</button>
   </div>
 
   <div class="row">
@@ -208,12 +212,6 @@
     </div>
   </div>
 
-  <div class="btn-row">
-    <button class="btn" onclick="playMulti()">▶ 再生</button>
-    <button class="btn secondary" onclick="copyOutput('multi')">📋 JSONコピー</button>
-    <button class="btn small" onclick="randomize('multi')">🎲 ランダム</button>
-  </div>
-  <div class="output" id="mn-output"></div>
 </div>
 
 <!-- =============== NoiseSE =============== -->
@@ -222,6 +220,11 @@
     <label style="color:var(--dim);">プリセット:</label>
     <select id="ns-preset"></select>
     <button class="btn small secondary" onclick="loadPreset('noise')">読込</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn" onclick="playNoise()">▶ 再生</button>
+    <button class="btn secondary" onclick="copyOutput('noise')">📋 JSONコピー</button>
+    <button class="btn small" onclick="randomize('noise')">🎲 ランダム</button>
   </div>
 
   <div class="row">
@@ -256,12 +259,6 @@
   </div>
   <div class="hint" style="margin-left:142px;">filterFreq=0のとき LPFなし（既存SEと互換）</div>
 
-  <div class="btn-row">
-    <button class="btn" onclick="playNoise()">▶ 再生</button>
-    <button class="btn secondary" onclick="copyOutput('noise')">📋 JSONコピー</button>
-    <button class="btn small" onclick="randomize('noise')">🎲 ランダム</button>
-  </div>
-  <div class="output" id="ns-output"></div>
 </div>
 
 <div class="toast" id="toast">コピーしました</div>
@@ -630,18 +627,10 @@ function updateOutput() {
     label.textContent = 'segmentDuration (秒)';
     hint.style.display = '';
     document.getElementById('sw-total').textContent = (config.segmentDuration * repeatCount).toFixed(3);
-    document.getElementById('sw-output').textContent =
-      'this.playRepeatingSweep(' + JSON.stringify(config) + ');';
   } else {
     label.textContent = 'duration (秒)';
     hint.style.display = 'none';
-    document.getElementById('sw-output').textContent =
-      'this.playFreqSweep(' + JSON.stringify(config) + ');';
   }
-  document.getElementById('mn-output').textContent =
-    'this.playMultiNote(' + JSON.stringify(getMultiConfig()) + ');';
-  document.getElementById('ns-output').textContent =
-    'this.playNoiseSE(' + JSON.stringify(getNoiseConfig()) + ');';
 }
 updateOutput();
 
@@ -669,8 +658,17 @@ function fallbackCopy(text) {
   return ok;
 }
 function copyOutput(kind) {
-  const id = { sweep: 'sw-output', multi: 'mn-output', noise: 'ns-output' }[kind];
-  const text = document.getElementById(id).textContent;
+  let text;
+  if (kind === 'sweep') {
+    const { repeatCount, config } = getSweepConfig();
+    text = repeatCount > 1
+      ? 'this.playRepeatingSweep(' + JSON.stringify(config) + ');'
+      : 'this.playFreqSweep(' + JSON.stringify(config) + ');';
+  } else if (kind === 'multi') {
+    text = 'this.playMultiNote(' + JSON.stringify(getMultiConfig()) + ');';
+  } else {
+    text = 'this.playNoiseSE(' + JSON.stringify(getNoiseConfig()) + ');';
+  }
   const done = () => showToast('コピーしました');
   const fail = () => {
     if (fallbackCopy(text)) done();
