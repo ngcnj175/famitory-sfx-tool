@@ -430,71 +430,35 @@ const Audio = {
     }
     return this.waveCache[key];
   },
-  playFreqSweep(config) {
-    const { startFreq, endFreq, duration = 0.1, waveType = 'square',
-      duty = null, startGain = 0.2, envelopeType = 'exponential' } = config;
-    this.playUnifiedSE({
-      waveType, duty,
-      envelopeMode: 'legacy4step',
-      sustainTime: duration,
-      masterVolume: startGain,
-      frequencyStart: startFreq,
-      frequencySlide: endFreq - startFreq,
-      slideType: envelopeType
-    });
-  },
-  playRepeatingSweep(config) {
-    this.ensureContext();
-    const { startFreq, endFreq, segmentDuration = 0.08, repeatCount = 6,
-      waveType = 'square', duty = null, startGain = 0.2, envelopeType = 'exponential' } = config;
-    const t0 = this.ctx.currentTime;
-    for (let i = 0; i < repeatCount; i++) {
-      this.playUnifiedSE({
-        waveType, duty,
-        envelopeMode: 'legacy4step',
-        sustainTime: segmentDuration,
-        masterVolume: startGain,
-        frequencyStart: startFreq,
-        frequencySlide: endFreq - startFreq,
-        slideType: envelopeType,
-        startTime: t0 + segmentDuration * i
-      });
-    }
-  },
-  playMultiNote(config) {
-    this.ensureContext();
-    const { notes, waveType = 'square', duty = null, gain = 0.2 } = config;
-    let currentTime = this.ctx.currentTime;
-    notes.forEach(note => {
-      this.playUnifiedSE({
-        waveType, duty,
-        envelopeMode: 'legacy4step',
-        sustainTime: note.duration,
-        masterVolume: gain,
-        frequencyStart: note.freq,
-        startTime: currentTime
-      });
-      currentTime += note.duration + (note.spacing || 0);
-    });
-  },
-  playNoiseSE(config) {
-    const { duration = 0.1, startGain = 0.2, sustainPunch = 0,
-      filterFreq = 0, filterSweep = 0, pitchJump = 0,
-      bpfFreq = 0, bpfFreqSweep = 0, bpfQ = 1 } = config;
-    this.playUnifiedSE({
-      waveType: 'noise',
-      envelopeMode: 'legacy4step',
-      sustainTime: duration,
-      masterVolume: startGain,
-      sustainPunch,
-      lpfFreq: filterFreq,
-      lpfSweep: filterSweep,
-      lpfPitchJump: pitchJump,
-      bpfFreq, bpfSweep: bpfFreqSweep, bpfQ
-    });
-  },
   playUnifiedSE(config) {
     this.ensureContext();
+    if (config.notes && config.notes.length > 0) {
+      const baseCfg = { ...config };
+      delete baseCfg.notes;
+      let t = config.startTime != null ? config.startTime : this.ctx.currentTime;
+      for (const note of config.notes) {
+        this.playUnifiedSE({
+          ...baseCfg,
+          sustainTime: note.duration,
+          frequencyStart: note.freq,
+          frequencySlide: 0,
+          startTime: t
+        });
+        t += note.duration + (note.spacing || 0);
+      }
+      return;
+    }
+    if ((config.repeatCount || 1) > 1 && config.segmentDuration) {
+      const baseCfg = { ...config };
+      delete baseCfg.repeatCount;
+      delete baseCfg.segmentDuration;
+      baseCfg.sustainTime = config.segmentDuration;
+      const t0 = config.startTime != null ? config.startTime : this.ctx.currentTime;
+      for (let i = 0; i < config.repeatCount; i++) {
+        this.playUnifiedSE({ ...baseCfg, startTime: t0 + config.segmentDuration * i });
+      }
+      return;
+    }
     const {
       waveType = 'square', duty = null,
       envelopeMode = 'adsr',
@@ -957,14 +921,55 @@ function enabled(kind) { return document.getElementById('use-' + kind).checked; 
 // ================================================================
 // 再生
 // ================================================================
+// 3つのUIセクションconfig → playUnifiedSE config へ変換
+function sweepToUnified() {
+  const { repeatCount, config: c } = getSweepConfig();
+  const u = {
+    envelopeMode: 'legacy4step',
+    waveType: c.waveType,
+    frequencyStart: c.startFreq,
+    frequencySlide: (c.endFreq ?? c.startFreq) - c.startFreq,
+    slideType: c.envelopeType ?? 'exponential',
+    masterVolume: c.startGain
+  };
+  if (c.duty != null) u.duty = c.duty;
+  if (repeatCount > 1) { u.repeatCount = repeatCount; u.segmentDuration = c.segmentDuration; }
+  else u.sustainTime = c.duration;
+  return u;
+}
+function multiToUnified() {
+  const c = getMultiConfig();
+  const u = {
+    envelopeMode: 'legacy4step',
+    waveType: c.waveType,
+    masterVolume: c.gain,
+    notes: c.notes
+  };
+  if (c.duty != null) u.duty = c.duty;
+  return u;
+}
+function noiseToUnified() {
+  const c = getNoiseConfig();
+  const u = {
+    envelopeMode: 'legacy4step',
+    waveType: 'noise',
+    sustainTime: c.duration,
+    masterVolume: c.startGain
+  };
+  if (c.sustainPunch) u.sustainPunch = c.sustainPunch;
+  if (c.filterFreq)   u.lpfFreq       = c.filterFreq;
+  if (c.filterSweep)  u.lpfSweep      = c.filterSweep;
+  if (c.pitchJump)    u.lpfPitchJump  = c.pitchJump;
+  if (c.bpfFreq)      u.bpfFreq       = c.bpfFreq;
+  if (c.bpfFreqSweep) u.bpfSweep      = c.bpfFreqSweep;
+  if (c.bpfQ && c.bpfQ !== 1) u.bpfQ  = c.bpfQ;
+  return u;
+}
+
 function playAll() {
-  if (enabled('sweep')) {
-    const { repeatCount, config } = getSweepConfig();
-    if (repeatCount > 1) Audio.playRepeatingSweep(config);
-    else Audio.playFreqSweep(config);
-  }
-  if (enabled('multi')) Audio.playMultiNote(getMultiConfig());
-  if (enabled('noise')) Audio.playNoiseSE(getNoiseConfig());
+  if (enabled('sweep')) Audio.playUnifiedSE(sweepToUnified());
+  if (enabled('multi')) Audio.playUnifiedSE(multiToUnified());
+  if (enabled('noise')) Audio.playUnifiedSE(noiseToUnified());
   if (enabled('unified')) Audio.playUnifiedSE(getUnifiedConfig());
 }
 
@@ -1011,21 +1016,10 @@ function fallbackCopy(text) {
 }
 function buildOutputText() {
   const lines = [];
-  if (enabled('sweep')) {
-    const { repeatCount, config } = getSweepConfig();
-    lines.push(repeatCount > 1
-      ? 'this.playRepeatingSweep(' + JSON.stringify(config) + ');'
-      : 'this.playFreqSweep(' + JSON.stringify(config) + ');');
-  }
-  if (enabled('multi')) {
-    lines.push('this.playMultiNote(' + JSON.stringify(getMultiConfig()) + ');');
-  }
-  if (enabled('noise')) {
-    lines.push('this.playNoiseSE(' + JSON.stringify(getNoiseConfig()) + ');');
-  }
-  if (enabled('unified')) {
-    lines.push('this.playUnifiedSE(' + JSON.stringify(getUnifiedConfig()) + ');');
-  }
+  if (enabled('sweep'))   lines.push('this.playUnifiedSE(' + JSON.stringify(sweepToUnified()) + ');');
+  if (enabled('multi'))   lines.push('this.playUnifiedSE(' + JSON.stringify(multiToUnified()) + ');');
+  if (enabled('noise'))   lines.push('this.playUnifiedSE(' + JSON.stringify(noiseToUnified()) + ');');
+  if (enabled('unified')) lines.push('this.playUnifiedSE(' + JSON.stringify(getUnifiedConfig()) + ');');
   return lines.join('\n');
 }
 function copyAll() {
