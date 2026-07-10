@@ -835,7 +835,7 @@ function playAll() {
     if (peak < 0.00001) { el.textContent = '---'; el.className = 'peak-display'; return; }
     const dBFS = 20 * Math.log10(peak);
     el.textContent = dBFS.toFixed(1) + ' dBFS';
-    el.className = 'peak-display ' + (dBFS >= -3 ? 'over' : 'good');
+    el.className = 'peak-display ' + (dBFS >= -22 ? 'over' : dBFS >= -26 ? 'good' : '');
   }
   requestAnimationFrame(poll);
 }
