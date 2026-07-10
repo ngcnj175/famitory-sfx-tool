@@ -19,27 +19,16 @@
   * { box-sizing: border-box; }
   html, body { height: 100%; }
   body {
-    margin: 0; padding: 20px;
+    margin: 0; padding: 12px 16px;
     background: var(--bg); color: var(--text);
     font-family: 'Consolas', 'Menlo', monospace;
     font-size: 13px;
     display: flex; flex-direction: column;
     overflow: hidden;
     height: 100dvh;
+    gap: 8px;
   }
-  h1 { margin: 0 0 12px; font-size: 18px; color: var(--accent); flex-shrink: 0; }
-  .panel {
-    background: var(--panel2); border: 1px solid var(--border);
-    padding: 20px; border-radius: 8px;
-    display: flex; flex-direction: column;
-    flex: 1 1 auto; min-height: 0;
-  }
-  .panel .preset-bar, .panel .btn-row { flex-shrink: 0; }
-  .panel > .section {
-    flex: 1 1 auto; min-height: 0;
-    overflow-y: auto; overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
+  h1 { margin: 0; font-size: 18px; color: var(--accent); flex-shrink: 0; }
   .row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
   .row label {
     display: inline-block; width: 130px; color: var(--dim); font-size: 12px;
@@ -62,7 +51,7 @@
   .btn.secondary { background: var(--accent2); }
   .btn.danger { background: var(--danger); color: #fff; }
   .btn.small { padding: 4px 10px; font-size: 11px; }
-  .btn-row { display: flex; gap: 8px; margin: 0 0 16px; flex-wrap: wrap; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
   .notes-list {
     background: var(--bg); border: 1px solid var(--border);
     padding: 8px; border-radius: 4px; margin-top: 4px;
@@ -76,13 +65,17 @@
   .note-row .idx { width: 24px; color: var(--dim); font-size: 11px; }
   .hint { color: var(--dim); font-size: 11px; margin-top: 4px; }
   .preset-bar {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
     padding: 10px; background: var(--bg); border-radius: 4px;
+    flex-shrink: 0;
   }
   .preset-bar select { flex: 1; }
   .section {
     border: 1px solid var(--border); border-radius: 6px;
-    background: var(--panel); padding: 12px;
+    background: var(--panel); padding: 8px;
+    flex: 1 1 auto; min-height: 0;
+    overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
   .toast {
     position: fixed; top: 20px; right: 20px; background: var(--accent);
@@ -95,8 +88,7 @@
 <body>
 <h1>FAMITORY SFX Tool</h1>
 
-<div class="panel">
-  <div class="preset-bar">
+<div class="preset-bar">
     <label style="color:var(--dim);">プリセット:</label>
     <select id="preset"></select>
     <button class="btn small secondary" onclick="loadPreset()">読込</button>
@@ -287,7 +279,6 @@
         <div class="hint" style="margin-top:4px;">音符を追加するとメロディモードになり、frequencyStart/Slideは無視されます<br>↕ドラッグで変更・ダブルタップでリセット / freq: Hz / dur: 秒 / gap: 次の音符まで秒</div>
       </div>
     </div>
-  </div>
 
 <div class="toast" id="toast">コピーしました</div>
 
