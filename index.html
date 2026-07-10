@@ -70,23 +70,8 @@
   .preset-bar select { flex: 1; }
   .section {
     border: 1px solid var(--border); border-radius: 6px;
-    margin-bottom: 12px; background: var(--panel);
+    background: var(--panel); padding: 12px;
   }
-  .section-header {
-    display: flex; align-items: center; gap: 8px;
-    padding: 10px 12px; cursor: pointer; user-select: none;
-    color: var(--accent); font-weight: bold; font-size: 14px;
-    touch-action: manipulation;
-  }
-  .section-header input[type="checkbox"] {
-    width: 18px; height: 18px; accent-color: var(--accent);
-    touch-action: manipulation;
-  }
-  .section-body {
-    padding: 12px; border-top: 1px solid var(--border);
-  }
-  .section.disabled .section-header { color: var(--dim); }
-  .section.disabled .section-body { display: none; }
   .toast {
     position: fixed; top: 20px; right: 20px; background: var(--accent);
     color: #000; padding: 8px 16px; border-radius: 4px; font-weight: bold;
@@ -594,6 +579,43 @@ const PRESETS = {
 };
 
 // ================================================================
+// UI フィールド定義 (単一データソース)
+// [inputId, presetKey, defaultValue]
+// ================================================================
+const NUM_FIELDS = [
+  ['un-attackTime',       'attackTime',       0],
+  ['un-sustainTime',      'sustainTime',      0.1],
+  ['un-sustainPunch',     'sustainPunch',     0],
+  ['un-decayTime',        'decayTime',        0.1],
+  ['un-masterVolume',     'masterVolume',     0.2],
+  ['un-frequencyStart',   'frequencyStart',   440],
+  ['un-frequencySlide',   'frequencySlide',   0],
+  ['un-vibratoDepth',     'vibratoDepth',     0],
+  ['un-vibratoSpeed',     'vibratoSpeed',     0],
+  ['un-pitchJump1Amount', 'pitchJump1Amount', 0],
+  ['un-pitchJump1Onset',  'pitchJump1Onset',  0],
+  ['un-pitchJump2Amount', 'pitchJump2Amount', 0],
+  ['un-pitchJump2Onset',  'pitchJump2Onset',  0],
+  ['un-harmonics',        'harmonics',        0],
+  ['un-harmonicsFalloff', 'harmonicsFalloff', 0.5],
+  ['un-hpfFreq',          'hpfFreq',          0],
+  ['un-hpfSweep',         'hpfSweep',         0],
+  ['un-lpfFreq',          'lpfFreq',          0],
+  ['un-lpfSweep',         'lpfSweep',         0],
+  ['un-lpfResonance',     'lpfResonance',     1],
+  ['un-bitCrush',         'bitCrush',         0],
+  ['un-flangerOffset',    'flangerOffset',    0],
+  ['un-flangerSweep',     'flangerSweep',     0],
+  ['un-compression',      'compression',      0],
+  ['un-repeatCount',      'repeatCount',      1]
+];
+const SELECT_FIELDS = [
+  ['un-waveType',  'waveType',  'square'],
+  ['un-duty',      'duty',      ''],
+  ['un-slideType', 'slideType', 'exponential']
+];
+
+// ================================================================
 // Slider <-> Number 同期
 // ================================================================
 function syncPair(rangeId, numberId) {
@@ -602,7 +624,7 @@ function syncPair(rangeId, numberId) {
   r.addEventListener('input', () => { n.value = r.value; });
   n.addEventListener('input', () => { r.value = n.value; });
 }
-['un-attackTime','un-sustainTime','un-sustainPunch','un-decayTime','un-masterVolume','un-frequencyStart','un-frequencySlide','un-vibratoDepth','un-vibratoSpeed','un-pitchJump1Amount','un-pitchJump1Onset','un-pitchJump2Amount','un-pitchJump2Onset','un-harmonics','un-harmonicsFalloff','un-hpfFreq','un-hpfSweep','un-lpfFreq','un-lpfSweep','un-lpfResonance','un-bitCrush','un-flangerOffset','un-flangerSweep','un-compression','un-repeatCount'].forEach(id => syncPair(id, id + '-n'));
+NUM_FIELDS.forEach(([id]) => syncPair(id, id + '-n'));
 
 // ================================================================
 // Preset dropdown (フラット、区切り行付き)
@@ -631,34 +653,8 @@ function loadPreset() {
   if (!name) return;
   const p = PRESETS[name];
   if (!p) return;
-  document.getElementById('un-waveType').value = p.waveType ?? 'square';
-  document.getElementById('un-duty').value = p.duty ?? '';
-  setV('un-attackTime', p.attackTime ?? 0);
-  setV('un-sustainTime', p.sustainTime ?? 0.1);
-  setV('un-sustainPunch', p.sustainPunch ?? 0);
-  setV('un-decayTime', p.decayTime ?? 0.1);
-  setV('un-masterVolume', p.masterVolume ?? 0.2);
-  setV('un-frequencyStart', p.frequencyStart ?? 440);
-  setV('un-frequencySlide', p.frequencySlide ?? 0);
-  document.getElementById('un-slideType').value = p.slideType ?? 'exponential';
-  setV('un-vibratoDepth', p.vibratoDepth ?? 0);
-  setV('un-vibratoSpeed', p.vibratoSpeed ?? 0);
-  setV('un-harmonics', p.harmonics ?? 0);
-  setV('un-harmonicsFalloff', p.harmonicsFalloff ?? 0.5);
-  setV('un-hpfFreq', p.hpfFreq ?? 0);
-  setV('un-hpfSweep', p.hpfSweep ?? 0);
-  setV('un-lpfFreq', p.lpfFreq ?? 0);
-  setV('un-lpfSweep', p.lpfSweep ?? 0);
-  setV('un-lpfResonance', p.lpfResonance ?? 1);
-  setV('un-pitchJump1Amount', p.pitchJump1Amount ?? 0);
-  setV('un-pitchJump1Onset', p.pitchJump1Onset ?? 0);
-  setV('un-pitchJump2Amount', p.pitchJump2Amount ?? 0);
-  setV('un-pitchJump2Onset', p.pitchJump2Onset ?? 0);
-  setV('un-bitCrush', p.bitCrush ?? 0);
-  setV('un-flangerOffset', p.flangerOffset ?? 0);
-  setV('un-flangerSweep', p.flangerSweep ?? 0);
-  setV('un-compression', p.compression ?? 0);
-  setV('un-repeatCount', p.repeatCount ?? 1);
+  SELECT_FIELDS.forEach(([id, key, def]) => document.getElementById(id).value = p[key] ?? def);
+  NUM_FIELDS.forEach(([id, key, def]) => setV(id, p[key] ?? def));
   setNotes(p.notes ?? []);
 }
 function setV(id, v) {
@@ -710,7 +706,7 @@ function renderNotes() {
         const def = DRAG_DEFAULTS[k] ?? 0;
         inp.value = def;
         notes[+inp.dataset.i][k] = def;
-          lastTap = 0;
+        lastTap = 0;
         return;
       }
       lastTap = now;
