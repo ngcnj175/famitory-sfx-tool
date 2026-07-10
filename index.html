@@ -77,6 +77,13 @@
     overflow-y: auto; overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
   }
+  .peak-display {
+    font-size: 12px; font-family: inherit;
+    color: var(--dim); align-self: center;
+    min-width: 80px;
+  }
+  .peak-display.good { color: var(--accent); }
+  .peak-display.over { color: var(--danger); }
   .toast {
     position: fixed; top: 20px; right: 20px; background: var(--accent);
     color: #000; padding: 8px 16px; border-radius: 4px; font-weight: bold;
@@ -97,6 +104,7 @@
     <button class="btn" onclick="playAll()">▶ 再生</button>
     <button class="btn secondary" onclick="copyAll()">📋 JSONコピー</button>
     <button class="btn small" onclick="randomizeAll()">🎲 ランダム</button>
+    <span id="peak-display" class="peak-display">---</span>
   </div>
 
   <!-- =============== Unified 統合シンセ =============== -->
@@ -802,7 +810,34 @@ function getUnifiedConfig() {
 // 再生
 // ================================================================
 function playAll() {
+  Audio.ensureContext();
+  const analyser = Audio.ctx.createAnalyser();
+  analyser.fftSize = 2048;
+  Audio.masterGain.connect(analyser);
+
   Audio.playUnifiedSE(getUnifiedConfig());
+
+  const buf = new Float32Array(analyser.fftSize);
+  let peak = 0;
+  let silentFrames = 0;
+  function poll() {
+    analyser.getFloatTimeDomainData(buf);
+    let localPeak = 0;
+    for (let i = 0; i < buf.length; i++) {
+      const v = Math.abs(buf[i]);
+      if (v > localPeak) localPeak = v;
+    }
+    if (localPeak > peak) peak = localPeak;
+    silentFrames = localPeak < 0.0001 ? silentFrames + 1 : 0;
+    if (silentFrames < 15) { requestAnimationFrame(poll); return; }
+    analyser.disconnect();
+    const el = document.getElementById('peak-display');
+    if (peak < 0.00001) { el.textContent = '---'; el.className = 'peak-display'; return; }
+    const dBFS = 20 * Math.log10(peak);
+    el.textContent = dBFS.toFixed(1) + ' dBFS';
+    el.className = 'peak-display ' + (dBFS >= -3 ? 'over' : 'good');
+  }
+  requestAnimationFrame(poll);
 }
 
 // ================================================================
