@@ -90,6 +90,23 @@
     opacity: 0; transition: opacity 0.2s; pointer-events: none;
   }
   .toast.show { opacity: 1; }
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px; width: min(480px, 90vw); display: flex; flex-direction: column; gap: 10px;
+  }
+  .modal h2 { margin: 0; font-size: 14px; color: var(--accent2); }
+  .modal textarea {
+    width: 100%; height: 140px; background: var(--bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 4px;
+    font-family: inherit; font-size: 12px; padding: 8px; resize: vertical;
+  }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
 </style>
 </head>
 <body>
@@ -103,6 +120,7 @@
   <div class="btn-row">
     <button class="btn" onclick="playAll()">▶ 再生</button>
     <button class="btn secondary" onclick="copyAll()">📋 JSONコピー</button>
+    <button class="btn secondary" onclick="openPasteModal()">📥 JSON読込</button>
     <button class="btn small" onclick="randomizeAll()">🎲 ランダム</button>
     <span id="peak-display" class="peak-display">---</span>
   </div>
@@ -289,6 +307,17 @@
     </div>
 
 <div class="toast" id="toast">コピーしました</div>
+
+<div class="modal-overlay" id="paste-modal" onclick="closePasteModal(event)">
+  <div class="modal">
+    <h2>📥 JSON読込</h2>
+    <textarea id="paste-area" placeholder='{"waveType":"square", ...} または&#10;this.playUnifiedSE({...});'></textarea>
+    <div class="modal-btns">
+      <button class="btn small danger" onclick="closePasteModal()">キャンセル</button>
+      <button class="btn small" onclick="applyPastedJSON()">読込</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ================================================================
@@ -876,6 +905,36 @@ function copyAll() {
   };
   if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done).catch(fail);
   else { if (fallbackCopy(text)) done(); else fail(); }
+}
+
+// ================================================================
+// JSON ペースト読込
+// ================================================================
+function openPasteModal() {
+  document.getElementById('paste-area').value = '';
+  document.getElementById('paste-modal').classList.add('show');
+  setTimeout(() => document.getElementById('paste-area').focus(), 50);
+}
+function closePasteModal(e) {
+  if (e && e.target !== document.getElementById('paste-modal')) return;
+  document.getElementById('paste-modal').classList.remove('show');
+}
+function applyPastedJSON() {
+  let raw = document.getElementById('paste-area').value.trim();
+  // this.playUnifiedSE({...}); 形式を許容
+  const m = raw.match(/playUnifiedSE\s*\((\{[\s\S]*\})\s*\)/);
+  if (m) raw = m[1];
+  let cfg;
+  try { cfg = JSON.parse(raw); } catch(e) {
+    showToast('JSONが無効です', true); return;
+  }
+  SELECT_FIELDS.forEach(([id, key, def]) => {
+    document.getElementById(id).value = cfg[key] ?? def;
+  });
+  NUM_FIELDS.forEach(([id, key, def]) => setV(id, cfg[key] ?? def));
+  setNotes(cfg.notes ?? []);
+  document.getElementById('paste-modal').classList.remove('show');
+  showToast('読み込みました');
 }
 
 // ================================================================
