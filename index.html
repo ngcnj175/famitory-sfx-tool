@@ -156,25 +156,16 @@
 
       <div class="hint" style="margin-left:142px;">--- エンベロープ ---</div>
       <div class="row">
-        <label>attackTime (秒)</label>
-        <input type="range" id="un-attackTime" min="0" max="0.5" step="0.005" value="0">
-        <input type="number" id="un-attackTime-n" step="0.005" value="0">
-      </div>
-      <div class="row">
         <label>sustainTime (秒)</label>
         <input type="range" id="un-sustainTime" min="0" max="1" step="0.005" value="0.1">
         <input type="number" id="un-sustainTime-n" step="0.005" value="0.1">
-      </div>
-      <div class="row">
-        <label>sustainPunch</label>
-        <input type="range" id="un-sustainPunch" min="0" max="2" step="0.05" value="0">
-        <input type="number" id="un-sustainPunch-n" step="0.05" value="0">
       </div>
       <div class="row">
         <label>decayTime (秒)</label>
         <input type="range" id="un-decayTime" min="0" max="1" step="0.005" value="0.1">
         <input type="number" id="un-decayTime-n" step="0.005" value="0.1">
       </div>
+      <div class="hint" style="margin-left:142px;">decayTimeはadsrモードのみ有効</div>
       <div class="row">
         <label>masterVolume</label>
         <input type="range" id="un-masterVolume" min="0.01" max="1" step="0.01" value="0.2">
@@ -191,20 +182,6 @@
         <label>frequencySlide (Hz)</label>
         <input type="range" id="un-frequencySlide" min="-3000" max="3000" step="1" value="0">
         <input type="number" id="un-frequencySlide-n" value="0">
-      </div>
-      <div class="row">
-        <label>slideType</label>
-        <select id="un-slideType">
-          <option value="exponential">exponential</option>
-          <option value="linear">linear</option>
-        </select>
-      </div>
-
-      <div class="hint" style="margin-left:142px;">--- ピッチランプ (オプション) ---</div>
-      <div style="margin-bottom: 10px;">
-        <div class="notes-list" id="un-ramps"></div>
-        <button class="btn small" onclick="addRamp()" style="margin-top:6px;">+ ランプ追加</button>
-        <div class="hint" style="margin-top:4px;">ランプを追加するとfrequencyStart/Slideは無視されます / freq: 目標Hz / time: そのランプにかける秒数</div>
       </div>
 
       <div class="hint" style="margin-left:142px;">--- 変調 ---</div>
@@ -241,68 +218,6 @@
         <input type="number" id="un-pitchJump2Onset-n" step="0.02" value="0">
       </div>
       <div class="hint" style="margin-left:142px;">onset=0で無効 / 時間比 (0.5=中央)</div>
-
-      <div class="hint" style="margin-left:142px;">--- 倍音 ---</div>
-      <div class="row">
-        <label>harmonics</label>
-        <input type="range" id="un-harmonics" min="0" max="4" step="1" value="0">
-        <input type="number" id="un-harmonics-n" value="0">
-      </div>
-      <div class="row">
-        <label>harmonicsFalloff</label>
-        <input type="range" id="un-harmonicsFalloff" min="0.1" max="1" step="0.05" value="0.5">
-        <input type="number" id="un-harmonicsFalloff-n" step="0.05" value="0.5">
-      </div>
-
-      <div class="hint" style="margin-left:142px;">--- フィルター ---</div>
-      <div class="row">
-        <label>hpfFreq (Hz)</label>
-        <input type="range" id="un-hpfFreq" min="0" max="4000" step="10" value="0">
-        <input type="number" id="un-hpfFreq-n" step="10" value="0">
-      </div>
-      <div class="row">
-        <label>hpfSweep (Hz)</label>
-        <input type="range" id="un-hpfSweep" min="-4000" max="4000" step="10" value="0">
-        <input type="number" id="un-hpfSweep-n" step="10" value="0">
-      </div>
-      <div class="row">
-        <label>lpfFreq (Hz)</label>
-        <input type="range" id="un-lpfFreq" min="0" max="4000" step="10" value="0">
-        <input type="number" id="un-lpfFreq-n" step="10" value="0">
-      </div>
-      <div class="row">
-        <label>lpfSweep (Hz)</label>
-        <input type="range" id="un-lpfSweep" min="-4000" max="4000" step="10" value="0">
-        <input type="number" id="un-lpfSweep-n" step="10" value="0">
-      </div>
-      <div class="row">
-        <label>lpfResonance</label>
-        <input type="range" id="un-lpfResonance" min="0.1" max="20" step="0.1" value="1">
-        <input type="number" id="un-lpfResonance-n" step="0.1" value="1">
-      </div>
-
-      <div class="hint" style="margin-left:142px;">--- エフェクト ---</div>
-      <div class="row">
-        <label>bitCrush</label>
-        <input type="range" id="un-bitCrush" min="0" max="1" step="0.02" value="0">
-        <input type="number" id="un-bitCrush-n" step="0.02" value="0">
-      </div>
-      <div class="row">
-        <label>flangerOffset (ms)</label>
-        <input type="range" id="un-flangerOffset" min="0" max="20" step="0.1" value="0">
-        <input type="number" id="un-flangerOffset-n" step="0.1" value="0">
-      </div>
-      <div class="row">
-        <label>flangerSweep (ms)</label>
-        <input type="range" id="un-flangerSweep" min="-20" max="20" step="0.1" value="0">
-        <input type="number" id="un-flangerSweep-n" step="0.1" value="0">
-      </div>
-      <div class="row">
-        <label>compression</label>
-        <input type="range" id="un-compression" min="0" max="1" step="0.02" value="0">
-        <input type="number" id="un-compression-n" step="0.02" value="0">
-      </div>
-      <div class="hint" style="margin-left:142px;">bitCrush: レトロ歪み / flanger: SF風エフェクト / compression: 音量圧縮</div>
 
       <div class="hint" style="margin-left:142px;">--- リピート ---</div>
       <div class="row">
@@ -392,26 +307,18 @@ const Audio = {
     const {
       waveType = 'square', duty = null,
       envelopeMode = 'adsr',
-      attackTime = 0, sustainTime = 0.1, sustainPunch = 0, decayTime = 0.1,
+      sustainTime = 0.1, decayTime = 0.1,
       masterVolume = 0.2,
-      frequencyStart = 440, frequencySlide = 0, slideType = 'exponential',
-      frequencyRamps = null,
+      frequencyStart = 440, frequencySlide = 0,
       pitchJump1Amount = 0, pitchJump1Onset = 0,
       pitchJump2Amount = 0, pitchJump2Onset = 0,
       vibratoDepth = 0, vibratoSpeed = 0,
-      harmonics = 0, harmonicsFalloff = 0.5,
-      hpfFreq = 0, hpfSweep = 0,
-      lpfFreq = 0, lpfSweep = 0, lpfResonance = 1, lpfPitchJump = 0,
-      bpfFreq = 0, bpfSweep = 0, bpfQ = 1,
-      bitCrush = 0,
-      flangerOffset = 0, flangerSweep = 0,
-      compression = 0,
       startTime = null
     } = config;
     const isLegacy = envelopeMode === 'legacy4step';
     const totalDur = isLegacy
       ? Math.max(0.01, sustainTime)
-      : Math.max(0.01, attackTime + sustainTime + decayTime);
+      : Math.max(0.01, sustainTime + decayTime);
     const t0 = startTime != null ? startTime : this.ctx.currentTime;
     const isNoise = waveType === 'noise';
     const sources = [];
@@ -424,32 +331,16 @@ const Audio = {
       src.buffer = buf;
       sources.push({ outNode: src, toStart: src, freqParam: null });
     } else {
-      const oscCount = 1 + Math.max(0, Math.min(4, Math.floor(harmonics)));
-      for (let i = 0; i < oscCount; i++) {
-        const osc = this.ctx.createOscillator();
-        if (duty && waveType === 'square') osc.setPeriodicWave(this._pulseWave(duty));
-        else osc.type = waveType;
-        const mult = i + 1;
-        const startF = Math.max(20, frequencyStart * mult);
-        osc.frequency.setValueAtTime(startF, t0);
-        if (frequencyRamps && frequencyRamps.length > 0) {
-          let rampT = t0;
-          for (const r of frequencyRamps) {
-            const rEnd = Math.max(20, r.freq * mult);
-            if (slideType === 'exponential') osc.frequency.exponentialRampToValueAtTime(rEnd, rampT + r.time);
-            else osc.frequency.linearRampToValueAtTime(rEnd, rampT + r.time);
-            rampT += r.time;
-          }
-        } else if (frequencySlide !== 0) {
-          const endF = Math.max(20, (frequencyStart + frequencySlide) * mult);
-          if (slideType === 'exponential') osc.frequency.exponentialRampToValueAtTime(endF, t0 + totalDur);
-          else osc.frequency.linearRampToValueAtTime(endF, t0 + totalDur);
-        }
-        const harmGain = this.ctx.createGain();
-        harmGain.gain.value = i === 0 ? 1 : Math.pow(harmonicsFalloff, i);
-        osc.connect(harmGain);
-        sources.push({ outNode: harmGain, toStart: osc, freqParam: osc.frequency });
+      const osc = this.ctx.createOscillator();
+      if (duty && waveType === 'square') osc.setPeriodicWave(this._pulseWave(duty));
+      else osc.type = waveType;
+      const startF = Math.max(20, frequencyStart);
+      osc.frequency.setValueAtTime(startF, t0);
+      if (frequencySlide !== 0) {
+        const endF = Math.max(20, frequencyStart + frequencySlide);
+        osc.frequency.exponentialRampToValueAtTime(endF, t0 + totalDur);
       }
+      sources.push({ outNode: osc, toStart: osc, freqParam: osc.frequency });
     }
     let lfo = null;
     if (!isNoise && vibratoDepth > 0 && vibratoSpeed > 0) {
@@ -477,94 +368,20 @@ const Audio = {
     }
     const mixer = this.ctx.createGain();
     sources.forEach(s => s.outNode.connect(mixer));
-    let chain = mixer;
-    if (bpfFreq > 0) {
-      const bpf = this.ctx.createBiquadFilter();
-      bpf.type = 'bandpass';
-      bpf.frequency.setValueAtTime(bpfFreq, t0);
-      if (bpfSweep !== 0) bpf.frequency.linearRampToValueAtTime(Math.max(20, bpfFreq + bpfSweep), t0 + totalDur);
-      bpf.Q.value = bpfQ;
-      chain.connect(bpf); chain = bpf;
-    }
-    if (hpfFreq > 0) {
-      const hpf = this.ctx.createBiquadFilter();
-      hpf.type = 'highpass';
-      hpf.frequency.setValueAtTime(hpfFreq, t0);
-      if (hpfSweep !== 0) hpf.frequency.linearRampToValueAtTime(Math.max(20, hpfFreq + hpfSweep), t0 + totalDur);
-      chain.connect(hpf); chain = hpf;
-    }
-    if (lpfFreq > 0) {
-      const lpf = this.ctx.createBiquadFilter();
-      lpf.type = 'lowpass';
-      lpf.frequency.setValueAtTime(lpfFreq + lpfPitchJump, t0);
-      if (lpfPitchJump > 0) lpf.frequency.linearRampToValueAtTime(lpfFreq, t0 + 0.02);
-      if (lpfSweep !== 0) lpf.frequency.linearRampToValueAtTime(Math.max(20, lpfFreq + lpfSweep), t0 + totalDur);
-      lpf.Q.value = lpfResonance;
-      chain.connect(lpf); chain = lpf;
-    }
-    if (bitCrush > 0) {
-      const ws = this.ctx.createWaveShaper();
-      const bits = Math.max(1, 16 - bitCrush * 15);
-      const steps = Math.pow(2, bits);
-      const n = 65536;
-      const curve = new Float32Array(n);
-      for (let i = 0; i < n; i++) {
-        const x = (i / (n / 2)) - 1;
-        curve[i] = Math.round(x * steps) / steps;
-      }
-      ws.curve = curve;
-      chain.connect(ws); chain = ws;
-    }
-    if (flangerOffset > 0 || flangerSweep !== 0) {
-      const maxDelay = Math.max(0.001, (Math.abs(flangerOffset) + Math.abs(flangerSweep)) / 1000 + 0.001);
-      const delay = this.ctx.createDelay(maxDelay);
-      const startD = Math.max(0, flangerOffset) / 1000;
-      const endD = Math.max(0, flangerOffset + flangerSweep) / 1000;
-      delay.delayTime.setValueAtTime(startD, t0);
-      if (flangerSweep !== 0) delay.delayTime.linearRampToValueAtTime(endD, t0 + totalDur);
-      const wetGain = this.ctx.createGain();
-      const dryGain = this.ctx.createGain();
-      const flangerMix = this.ctx.createGain();
-      wetGain.gain.value = 0.5;
-      dryGain.gain.value = 0.5;
-      chain.connect(delay); delay.connect(wetGain); wetGain.connect(flangerMix);
-      chain.connect(dryGain); dryGain.connect(flangerMix);
-      chain = flangerMix;
-    }
     const envGain = this.ctx.createGain();
-    const peakGain = masterVolume * (1 + sustainPunch);
     if (isLegacy) {
       const step = totalDur / 4;
-      envGain.gain.setValueAtTime(peakGain, t0);
+      envGain.gain.setValueAtTime(masterVolume, t0);
       envGain.gain.setValueAtTime(masterVolume * 0.6, t0 + step);
       envGain.gain.setValueAtTime(masterVolume * 0.25, t0 + step * 2);
       envGain.gain.setValueAtTime(0.001, t0 + step * 3);
     } else {
-      if (attackTime > 0) {
-        envGain.gain.setValueAtTime(0.0001, t0);
-        envGain.gain.linearRampToValueAtTime(peakGain, t0 + attackTime);
-      } else {
-        envGain.gain.setValueAtTime(peakGain, t0);
-      }
-      envGain.gain.setValueAtTime(peakGain, t0 + attackTime);
-      if (sustainPunch > 0 && sustainTime > 0) {
-        envGain.gain.linearRampToValueAtTime(masterVolume, t0 + attackTime + Math.min(sustainTime, sustainTime * 0.3 + 0.02));
-      }
-      envGain.gain.setValueAtTime(masterVolume, t0 + attackTime + sustainTime);
+      envGain.gain.setValueAtTime(masterVolume, t0);
+      envGain.gain.setValueAtTime(masterVolume, t0 + sustainTime);
       if (decayTime > 0) envGain.gain.linearRampToValueAtTime(0.0001, t0 + totalDur);
     }
-    chain.connect(envGain);
-    let outNode = envGain;
-    if (compression > 0) {
-      const comp = this.ctx.createDynamicsCompressor();
-      comp.threshold.value = -24 - compression * 20;
-      comp.knee.value = 30;
-      comp.ratio.value = 1 + compression * 19;
-      comp.attack.value = 0.003;
-      comp.release.value = 0.1;
-      envGain.connect(comp); outNode = comp;
-    }
-    outNode.connect(this.masterGain);
+    mixer.connect(envGain);
+    envGain.connect(this.masterGain);
     sources.forEach(s => { s.toStart.start(t0); s.toStart.stop(t0 + totalDur + 0.02); });
     if (lfo) { lfo.start(t0); lfo.stop(t0 + totalDur + 0.02); }
     if (jumpCS) { jumpCS.start(t0); jumpCS.stop(t0 + totalDur + 0.02); }
@@ -579,13 +396,13 @@ const PRESETS = {
   'jump_01': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 400, frequencySlide: 600, sustainTime: 0.1, masterVolume: 0.15 },
   'jump_02': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 300, frequencySlide: 600, sustainTime: 0.08 },
   'jump_03': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 200, frequencySlide: 400, sustainTime: 0.1 },
-  'jump_04': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 150, sustainTime: 0.1 },
+  'jump_04': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 150, frequencySlide: 250, sustainTime: 0.1 },
   'jump_05': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.25, frequencyStart: 304, frequencySlide: 684, sustainTime: 0.205, masterVolume: 0.5 },
 
   '__攻撃系__': null,
   'attack_01': { envelopeMode: 'legacy4step', waveType: 'sawtooth', frequencyStart: 393, frequencySlide: 1001, sustainTime: 0.055, masterVolume: 0.31 },
   'attack_02': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.125, frequencyStart: 800, frequencySlide: -600, sustainTime: 0.06 },
-  'attack_03': { waveType: 'noise', attackTime: 0, sustainTime: 0.085, decayTime: 0.06, masterVolume: 0.26, sustainPunch: 1.15, hpfFreq: 1380, hpfSweep: -3860, lpfFreq: 2120, lpfSweep: 1030, lpfResonance: 0.6, flangerSweep: 20 },
+  'attack_03': { waveType: 'noise', sustainTime: 0.085, decayTime: 0.06, masterVolume: 0.26, frequencyStart: 3642, frequencySlide: -1044 },
   'attack_04': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 600, frequencySlide: -450, sustainTime: 0.06 },
   'attack_05': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.25, frequencyStart: 1200, frequencySlide: -800, sustainTime: 0.08 },
 
@@ -593,7 +410,7 @@ const PRESETS = {
   'damage_01': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 400, frequencySlide: -300, sustainTime: 0.15 },
   'damage_02': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 300, frequencySlide: -220, sustainTime: 0.1 },
   'damage_03': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 200, frequencySlide: -150, sustainTime: 0.15 },
-  'damage_04': { waveType: 'square', attackTime: 0, sustainTime: 0.165, decayTime: 0.095, masterVolume: 0.34, frequencyStart: 164, frequencySlide: -122, vibratoDepth: 23, vibratoSpeed: 9.5, pitchJump1Amount: 160, pitchJump1Onset: 0.1, flangerSweep: -20 },
+  'damage_04': { waveType: 'square', sustainTime: 0.165, decayTime: 0.095, masterVolume: 0.34, frequencyStart: 164, frequencySlide: -122, vibratoDepth: 23, vibratoSpeed: 9.5, pitchJump1Amount: 160, pitchJump1Onset: 0.1 },
   'damage_05': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.25, frequencyStart: 500, frequencySlide: -440, sustainTime: 0.12 },
 
   '__アイテムゲット系__': null,
@@ -601,7 +418,7 @@ const PRESETS = {
   'itemGet_02': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 295, frequencySlide: 2532, sustainTime: 0.24, masterVolume: 0.15 },
   'itemGet_03': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.5, masterVolume: 0.57, notes: [{ freq: 467, duration: 0.061, spacing: 0.035 }, { freq: 945, duration: 0.099 }, { freq: 1429, duration: 0.097, spacing: 0.034 }, { freq: 1416, duration: 0.039 }, { freq: 1219, duration: 0.05 }] },
   'itemGet_04': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.25, masterVolume: 0.5, notes: [{ freq: 523, duration: 0.05 }, { freq: 659, duration: 0.07 }] },
-  'itemGet_05': { waveType: 'square', attackTime: 0, sustainTime: 0.15, decayTime: 0.195, masterVolume: 0.36, frequencyStart: 85, duty: 0.25, sustainPunch: 0.4, frequencySlide: 3000, vibratoDepth: 13, vibratoSpeed: 17, hpfFreq: 1200, hpfSweep: -1660, lpfSweep: -600, pitchJump1Amount: 480, pitchJump1Onset: 0.42, pitchJump2Amount: 800, pitchJump2Onset: 0.28, flangerOffset: 0, flangerSweep: -20, compression: 0.06, repeatCount: 2 },
+  'itemGet_05': { waveType: 'square', sustainTime: 0.15, decayTime: 0.195, masterVolume: 0.36, frequencyStart: 85, duty: 0.25, frequencySlide: 3000, vibratoDepth: 13, vibratoSpeed: 17, pitchJump1Amount: 480, pitchJump1Onset: 0.42, pitchJump2Amount: 800, pitchJump2Onset: 0.28, repeatCount: 2 },
 
   '__その他系__': null,
   'other_01': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 440, frequencySlide: 440, sustainTime: 0.05, masterVolume: 0.15 },
@@ -619,9 +436,7 @@ const PRESETS = {
 // [inputId, presetKey, defaultValue]
 // ================================================================
 const NUM_FIELDS = [
-  ['un-attackTime',       'attackTime',       0],
   ['un-sustainTime',      'sustainTime',      0.1],
-  ['un-sustainPunch',     'sustainPunch',     0],
   ['un-decayTime',        'decayTime',        0.1],
   ['un-masterVolume',     'masterVolume',     0.2],
   ['un-frequencyStart',   'frequencyStart',   440],
@@ -632,23 +447,11 @@ const NUM_FIELDS = [
   ['un-pitchJump1Onset',  'pitchJump1Onset',  0],
   ['un-pitchJump2Amount', 'pitchJump2Amount', 0],
   ['un-pitchJump2Onset',  'pitchJump2Onset',  0],
-  ['un-harmonics',        'harmonics',        0],
-  ['un-harmonicsFalloff', 'harmonicsFalloff', 0.5],
-  ['un-hpfFreq',          'hpfFreq',          0],
-  ['un-hpfSweep',         'hpfSweep',         0],
-  ['un-lpfFreq',          'lpfFreq',          0],
-  ['un-lpfSweep',         'lpfSweep',         0],
-  ['un-lpfResonance',     'lpfResonance',     1],
-  ['un-bitCrush',         'bitCrush',         0],
-  ['un-flangerOffset',    'flangerOffset',    0],
-  ['un-flangerSweep',     'flangerSweep',     0],
-  ['un-compression',      'compression',      0],
   ['un-repeatCount',      'repeatCount',      1]
 ];
 const SELECT_FIELDS = [
   ['un-waveType',      'waveType',      'square'],
   ['un-duty',          'duty',          ''],
-  ['un-slideType',     'slideType',     'exponential'],
   ['un-envelopeMode',  'envelopeMode',  'adsr']
 ];
 
@@ -693,7 +496,6 @@ function loadPreset() {
   SELECT_FIELDS.forEach(([id, key, def]) => document.getElementById(id).value = p[key] ?? def);
   NUM_FIELDS.forEach(([id, key, def]) => setV(id, p[key] ?? def));
   setNotes(p.notes ?? []);
-  setRamps(p.frequencyRamps ?? []);
 }
 function setV(id, v) {
   document.getElementById(id).value = v;
@@ -773,79 +575,12 @@ function setNotes(arr) {
 renderNotes();
 
 // ================================================================
-// ピッチランプ (frequencyRamps) 管理
-// ================================================================
-let ramps = [];
-function renderRamps() {
-  const box = document.getElementById('un-ramps');
-  box.innerHTML = '';
-  ramps.forEach((r, i) => {
-    const row = document.createElement('div');
-    row.className = 'note-row';
-    row.innerHTML = `
-      <span class="idx">#${i+1}</span>
-      <span style="color:var(--dim);font-size:11px;">freq</span>
-      <input type="number" value="${r.freq}" data-i="${i}" data-k="freq">
-      <span style="color:var(--dim);font-size:11px;">time</span>
-      <input type="number" step="0.005" value="${r.time}" data-i="${i}" data-k="time">
-      <button class="btn small danger" onclick="removeRamp(${i})">×</button>
-    `;
-    box.appendChild(row);
-  });
-  box.querySelectorAll('input').forEach(inp => {
-    inp.addEventListener('input', e => {
-      const i = +e.target.dataset.i, k = e.target.dataset.k;
-      ramps[i][k] = parseFloat(e.target.value) || 0;
-    });
-  });
-  const DRAG_DEFAULTS = { freq: 440, time: 0.05 };
-  const DRAG_STEP     = { freq: 5, time: 0.005 };
-  const DRAG_MIN      = { freq: 20, time: 0.005 };
-  const DRAG_MAX      = { freq: 4000, time: 2 };
-  box.querySelectorAll('input').forEach(inp => {
-    let startY, startVal, lastTap = 0;
-    inp.addEventListener('touchstart', e => {
-      const now = Date.now();
-      if (now - lastTap < 300) {
-        e.preventDefault();
-        const k = inp.dataset.k;
-        inp.value = DRAG_DEFAULTS[k] ?? 0;
-        ramps[+inp.dataset.i][k] = DRAG_DEFAULTS[k] ?? 0;
-        lastTap = 0; return;
-      }
-      lastTap = now;
-      startY = e.touches[0].clientY;
-      startVal = parseFloat(inp.value) || 0;
-    }, { passive: false });
-    inp.addEventListener('touchmove', e => {
-      e.preventDefault();
-      const k = inp.dataset.k;
-      const dy = startY - e.touches[0].clientY;
-      let v = startVal + dy * (DRAG_STEP[k] ?? 1);
-      v = Math.max(DRAG_MIN[k] ?? 0, Math.min(DRAG_MAX[k] ?? 9999, v));
-      if (k === 'freq') v = Math.round(v);
-      else v = parseFloat(v.toFixed(3));
-      inp.value = v;
-      ramps[+inp.dataset.i][k] = v;
-    }, { passive: false });
-  });
-}
-function addRamp() { ramps.push({ freq: 440, time: 0.05 }); renderRamps(); }
-function removeRamp(i) { ramps.splice(i, 1); renderRamps(); }
-function setRamps(arr) {
-  ramps = arr.map(r => ({ freq: r.freq, time: r.time }));
-  renderRamps();
-}
-renderRamps();
-
-// ================================================================
 // Config 生成
 // ================================================================
 function getUnifiedConfig() {
   const c = {
-    waveType: document.getElementById('un-waveType').value,
+    waveType:       document.getElementById('un-waveType').value,
     envelopeMode:   document.getElementById('un-envelopeMode').value,
-    attackTime:     +document.getElementById('un-attackTime').value,
     sustainTime:    +document.getElementById('un-sustainTime').value,
     decayTime:      +document.getElementById('un-decayTime').value,
     masterVolume:   +document.getElementById('un-masterVolume').value,
@@ -853,46 +588,20 @@ function getUnifiedConfig() {
   };
   const duty = document.getElementById('un-duty').value;
   if (duty) c.duty = +duty;
-  const sustainPunch     = +document.getElementById('un-sustainPunch').value;
   const frequencySlide   = +document.getElementById('un-frequencySlide').value;
-  const slideType        = document.getElementById('un-slideType').value;
   const vibratoDepth     = +document.getElementById('un-vibratoDepth').value;
   const vibratoSpeed     = +document.getElementById('un-vibratoSpeed').value;
-  const harmonics        = +document.getElementById('un-harmonics').value;
-  const harmonicsFalloff = +document.getElementById('un-harmonicsFalloff').value;
-  const hpfFreq          = +document.getElementById('un-hpfFreq').value;
-  const hpfSweep         = +document.getElementById('un-hpfSweep').value;
-  const lpfFreq          = +document.getElementById('un-lpfFreq').value;
-  const lpfSweep         = +document.getElementById('un-lpfSweep').value;
-  const lpfResonance     = +document.getElementById('un-lpfResonance').value;
   const pitchJump1Amount = +document.getElementById('un-pitchJump1Amount').value;
   const pitchJump1Onset  = +document.getElementById('un-pitchJump1Onset').value;
   const pitchJump2Amount = +document.getElementById('un-pitchJump2Amount').value;
   const pitchJump2Onset  = +document.getElementById('un-pitchJump2Onset').value;
-  const bitCrush         = +document.getElementById('un-bitCrush').value;
-  const flangerOffset    = +document.getElementById('un-flangerOffset').value;
-  const flangerSweep     = +document.getElementById('un-flangerSweep').value;
-  const compression      = +document.getElementById('un-compression').value;
-  if (sustainPunch)              c.sustainPunch = sustainPunch;
   if (frequencySlide)            c.frequencySlide = frequencySlide;
-  if (slideType !== 'exponential') c.slideType = slideType;
   if (vibratoDepth)              c.vibratoDepth = vibratoDepth;
   if (vibratoSpeed)              c.vibratoSpeed = vibratoSpeed;
-  if (harmonics)                 c.harmonics = harmonics;
-  if (harmonics && harmonicsFalloff !== 0.5) c.harmonicsFalloff = harmonicsFalloff;
-  if (hpfFreq)                   c.hpfFreq = hpfFreq;
-  if (hpfSweep)                  c.hpfSweep = hpfSweep;
-  if (lpfFreq)                   c.lpfFreq = lpfFreq;
-  if (lpfSweep)                  c.lpfSweep = lpfSweep;
-  if (lpfFreq && lpfResonance !== 1) c.lpfResonance = lpfResonance;
   if (pitchJump1Amount && pitchJump1Onset > 0) { c.pitchJump1Amount = pitchJump1Amount; c.pitchJump1Onset = pitchJump1Onset; }
   if (pitchJump2Amount && pitchJump2Onset > 0) { c.pitchJump2Amount = pitchJump2Amount; c.pitchJump2Onset = pitchJump2Onset; }
-  if (bitCrush)                  c.bitCrush = bitCrush;
-  if (flangerOffset > 0 || flangerSweep) { c.flangerOffset = flangerOffset; if (flangerSweep) c.flangerSweep = flangerSweep; }
-  if (compression)               c.compression = compression;
   const repeatCount = +document.getElementById('un-repeatCount').value;
   if (repeatCount > 1) c.repeatCount = repeatCount;
-  if (ramps.length > 0) c.frequencyRamps = ramps.map(r => ({ freq: r.freq, time: r.time }));
   if (notes.length > 0) c.notes = notes.map(n => {
     const o = { freq: n.freq, duration: n.duration };
     if (n.spacing) o.spacing = n.spacing;
@@ -999,7 +708,6 @@ function applyPastedJSON() {
   });
   NUM_FIELDS.forEach(([id, key, def]) => setV(id, cfg[key] ?? def));
   setNotes(cfg.notes ?? []);
-  setRamps(cfg.frequencyRamps ?? []);
   document.getElementById('paste-modal').classList.remove('show');
   showToast('読み込みました');
 }
@@ -1011,13 +719,13 @@ function rand(min, max) { return Math.random() * (max - min) + min; }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function randomizeAll() {
   const duties = ['', '0.125', '0.25', '0.5'];
-  const unifiedWaves = ['square','square','sine','triangle','sawtooth','noise'];
-  const w = pick(unifiedWaves);
+  const waves = ['square','square','sine','triangle','sawtooth','noise'];
+  const envModes = ['adsr', 'legacy4step', 'legacy4step'];
+  const w = pick(waves);
   document.getElementById('un-waveType').value = w;
   document.getElementById('un-duty').value = pick(duties);
-  setV('un-attackTime', Math.random() < 0.3 ? +rand(0.005, 0.05).toFixed(3) : 0);
+  document.getElementById('un-envelopeMode').value = pick(envModes);
   setV('un-sustainTime', +rand(0.03, 0.2).toFixed(3));
-  setV('un-sustainPunch', Math.random() < 0.4 ? +rand(0, 0.6).toFixed(2) : 0);
   setV('un-decayTime', +rand(0.05, 0.3).toFixed(3));
   setV('un-masterVolume', +rand(0.15, 0.35).toFixed(2));
   setV('un-frequencyStart', Math.floor(rand(150, 1500)));
@@ -1025,27 +733,12 @@ function randomizeAll() {
   const useVib = Math.random() < 0.3 && w !== 'noise';
   setV('un-vibratoDepth', useVib ? Math.floor(rand(3, 30)) : 0);
   setV('un-vibratoSpeed', useVib ? +rand(5, 30).toFixed(1) : 0);
-  const useHarm = Math.random() < 0.3 && w !== 'noise';
-  setV('un-harmonics', useHarm ? Math.floor(rand(1, 4)) : 0);
-  setV('un-harmonicsFalloff', +rand(0.3, 0.7).toFixed(2));
-  const useHpf = Math.random() < 0.3;
-  setV('un-hpfFreq', useHpf ? Math.floor(rand(100, 1500)) : 0);
-  setV('un-hpfSweep', useHpf && Math.random() < 0.5 ? Math.floor(rand(-1000, 1000)) : 0);
-  const useLpf = Math.random() < 0.4;
-  setV('un-lpfFreq', useLpf ? Math.floor(rand(300, 3000)) : 0);
-  setV('un-lpfSweep', useLpf && Math.random() < 0.5 ? Math.floor(rand(-1500, 500)) : 0);
-  setV('un-lpfResonance', useLpf ? +rand(0.5, 5).toFixed(1) : 1);
   const useJump1 = Math.random() < 0.25 && w !== 'noise';
   setV('un-pitchJump1Amount', useJump1 ? Math.floor(rand(-500, 500)) : 0);
   setV('un-pitchJump1Onset', useJump1 ? +rand(0.1, 0.7).toFixed(2) : 0);
   const useJump2 = useJump1 && Math.random() < 0.4;
   setV('un-pitchJump2Amount', useJump2 ? Math.floor(rand(-500, 500)) : 0);
   setV('un-pitchJump2Onset', useJump2 ? +rand(0.5, 0.9).toFixed(2) : 0);
-  setV('un-bitCrush', Math.random() < 0.3 ? +rand(0.1, 0.6).toFixed(2) : 0);
-  const useFlanger = Math.random() < 0.2;
-  setV('un-flangerOffset', useFlanger ? +rand(0.5, 5).toFixed(1) : 0);
-  setV('un-flangerSweep', useFlanger ? +rand(-8, 8).toFixed(1) : 0);
-  setV('un-compression', Math.random() < 0.2 ? +rand(0.2, 0.7).toFixed(2) : 0);
   setV('un-repeatCount', Math.random() < 0.3 ? Math.floor(rand(2, 8)) : 1);
   if (Math.random() < 0.15 && w !== 'noise') {
     const n = Math.floor(rand(2, 5));
