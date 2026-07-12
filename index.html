@@ -146,6 +146,14 @@
         </select>
       </div>
 
+      <div class="row">
+        <label>envelopeMode</label>
+        <select id="un-envelopeMode">
+          <option value="adsr">adsr</option>
+          <option value="legacy4step">legacy4step</option>
+        </select>
+      </div>
+
       <div class="hint" style="margin-left:142px;">--- エンベロープ ---</div>
       <div class="row">
         <label>attackTime (秒)</label>
@@ -638,9 +646,10 @@ const NUM_FIELDS = [
   ['un-repeatCount',      'repeatCount',      1]
 ];
 const SELECT_FIELDS = [
-  ['un-waveType',  'waveType',  'square'],
-  ['un-duty',      'duty',      ''],
-  ['un-slideType', 'slideType', 'exponential']
+  ['un-waveType',      'waveType',      'square'],
+  ['un-duty',          'duty',          ''],
+  ['un-slideType',     'slideType',     'exponential'],
+  ['un-envelopeMode',  'envelopeMode',  'adsr']
 ];
 
 // ================================================================
@@ -835,6 +844,7 @@ renderRamps();
 function getUnifiedConfig() {
   const c = {
     waveType: document.getElementById('un-waveType').value,
+    envelopeMode:   document.getElementById('un-envelopeMode').value,
     attackTime:     +document.getElementById('un-attackTime').value,
     sustainTime:    +document.getElementById('un-sustainTime').value,
     decayTime:      +document.getElementById('un-decayTime').value,
