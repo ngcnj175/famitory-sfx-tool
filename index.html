@@ -192,6 +192,13 @@
         </select>
       </div>
 
+      <div class="hint" style="margin-left:142px;">--- ピッチランプ (オプション) ---</div>
+      <div style="margin-bottom: 10px;">
+        <div class="notes-list" id="un-ramps"></div>
+        <button class="btn small" onclick="addRamp()" style="margin-top:6px;">+ ランプ追加</button>
+        <div class="hint" style="margin-top:4px;">ランプを追加するとfrequencyStart/Slideは無視されます / freq: 目標Hz / time: そのランプにかける秒数</div>
+      </div>
+
       <div class="hint" style="margin-left:142px;">--- 変調 ---</div>
       <div class="row">
         <label>vibratoDepth (Hz)</label>
@@ -677,6 +684,7 @@ function loadPreset() {
   SELECT_FIELDS.forEach(([id, key, def]) => document.getElementById(id).value = p[key] ?? def);
   NUM_FIELDS.forEach(([id, key, def]) => setV(id, p[key] ?? def));
   setNotes(p.notes ?? []);
+  setRamps(p.frequencyRamps ?? []);
 }
 function setV(id, v) {
   document.getElementById(id).value = v;
@@ -756,6 +764,72 @@ function setNotes(arr) {
 renderNotes();
 
 // ================================================================
+// ピッチランプ (frequencyRamps) 管理
+// ================================================================
+let ramps = [];
+function renderRamps() {
+  const box = document.getElementById('un-ramps');
+  box.innerHTML = '';
+  ramps.forEach((r, i) => {
+    const row = document.createElement('div');
+    row.className = 'note-row';
+    row.innerHTML = `
+      <span class="idx">#${i+1}</span>
+      <span style="color:var(--dim);font-size:11px;">freq</span>
+      <input type="number" value="${r.freq}" data-i="${i}" data-k="freq">
+      <span style="color:var(--dim);font-size:11px;">time</span>
+      <input type="number" step="0.005" value="${r.time}" data-i="${i}" data-k="time">
+      <button class="btn small danger" onclick="removeRamp(${i})">×</button>
+    `;
+    box.appendChild(row);
+  });
+  box.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const i = +e.target.dataset.i, k = e.target.dataset.k;
+      ramps[i][k] = parseFloat(e.target.value) || 0;
+    });
+  });
+  const DRAG_DEFAULTS = { freq: 440, time: 0.05 };
+  const DRAG_STEP     = { freq: 5, time: 0.005 };
+  const DRAG_MIN      = { freq: 20, time: 0.005 };
+  const DRAG_MAX      = { freq: 4000, time: 2 };
+  box.querySelectorAll('input').forEach(inp => {
+    let startY, startVal, lastTap = 0;
+    inp.addEventListener('touchstart', e => {
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        e.preventDefault();
+        const k = inp.dataset.k;
+        inp.value = DRAG_DEFAULTS[k] ?? 0;
+        ramps[+inp.dataset.i][k] = DRAG_DEFAULTS[k] ?? 0;
+        lastTap = 0; return;
+      }
+      lastTap = now;
+      startY = e.touches[0].clientY;
+      startVal = parseFloat(inp.value) || 0;
+    }, { passive: false });
+    inp.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const k = inp.dataset.k;
+      const dy = startY - e.touches[0].clientY;
+      let v = startVal + dy * (DRAG_STEP[k] ?? 1);
+      v = Math.max(DRAG_MIN[k] ?? 0, Math.min(DRAG_MAX[k] ?? 9999, v));
+      if (k === 'freq') v = Math.round(v);
+      else v = parseFloat(v.toFixed(3));
+      inp.value = v;
+      ramps[+inp.dataset.i][k] = v;
+    }, { passive: false });
+  });
+}
+function addRamp() { ramps.push({ freq: 440, time: 0.05 }); renderRamps(); }
+function removeRamp(i) { ramps.splice(i, 1); renderRamps(); }
+function setRamps(arr) {
+  ramps = arr.map(r => ({ freq: r.freq, time: r.time }));
+  renderRamps();
+}
+renderRamps();
+
+// ================================================================
 // Config 生成
 // ================================================================
 function getUnifiedConfig() {
@@ -808,6 +882,7 @@ function getUnifiedConfig() {
   if (compression)               c.compression = compression;
   const repeatCount = +document.getElementById('un-repeatCount').value;
   if (repeatCount > 1) c.repeatCount = repeatCount;
+  if (ramps.length > 0) c.frequencyRamps = ramps.map(r => ({ freq: r.freq, time: r.time }));
   if (notes.length > 0) c.notes = notes.map(n => {
     const o = { freq: n.freq, duration: n.duration };
     if (n.spacing) o.spacing = n.spacing;
@@ -914,6 +989,7 @@ function applyPastedJSON() {
   });
   NUM_FIELDS.forEach(([id, key, def]) => setV(id, cfg[key] ?? def));
   setNotes(cfg.notes ?? []);
+  setRamps(cfg.frequencyRamps ?? []);
   document.getElementById('paste-modal').classList.remove('show');
   showToast('読み込みました');
 }
