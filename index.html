@@ -394,24 +394,24 @@ const Audio = {
 const PRESETS = {
   '__ジャンプ系__': null,
   'jump_01': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 400, frequencySlide: 600, sustainTime: 0.1, masterVolume: 0.15 },
-  'jump_02': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 300, frequencySlide: 600, sustainTime: 0.08 },
+  'jump_02': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.25, frequencyStart: 304, frequencySlide: 684, sustainTime: 0.205, masterVolume: 0.5 },
   'jump_03': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 200, frequencySlide: 400, sustainTime: 0.1 },
   'jump_04': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 150, frequencySlide: 250, sustainTime: 0.1 },
-  'jump_05': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.25, frequencyStart: 304, frequencySlide: 684, sustainTime: 0.205, masterVolume: 0.5 },
+  'jump_05': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 300, frequencySlide: 600, sustainTime: 0.08 },
 
   '__攻撃系__': null,
   'attack_01': { envelopeMode: 'legacy4step', waveType: 'sawtooth', frequencyStart: 393, frequencySlide: 1001, sustainTime: 0.055, masterVolume: 0.31 },
-  'attack_02': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.125, frequencyStart: 800, frequencySlide: -600, sustainTime: 0.06 },
+  'attack_02': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.125, frequencyStart: 800, frequencySlide: -600, sustainTime: 0.06, masterVolume: 0.5 },
   'attack_03': { waveType: 'noise', sustainTime: 0.085, decayTime: 0.06, masterVolume: 0.26, frequencyStart: 3642, frequencySlide: -1044 },
   'attack_04': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 600, frequencySlide: -450, sustainTime: 0.06 },
-  'attack_05': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.25, frequencyStart: 1200, frequencySlide: -800, sustainTime: 0.08 },
+  'attack_05': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.25, frequencyStart: 1200, frequencySlide: -800, sustainTime: 0.08, masterVolume: 0.43 },
 
   '__ダメージ系__': null,
   'damage_01': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 400, frequencySlide: -300, sustainTime: 0.15 },
   'damage_02': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 300, frequencySlide: -220, sustainTime: 0.1 },
   'damage_03': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 200, frequencySlide: -150, sustainTime: 0.15 },
-  'damage_04': { waveType: 'square', sustainTime: 0.165, decayTime: 0.095, masterVolume: 0.34, frequencyStart: 164, frequencySlide: -122, vibratoDepth: 23, vibratoSpeed: 9.5, pitchJump1Amount: 160, pitchJump1Onset: 0.1 },
-  'damage_05': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.25, frequencyStart: 500, frequencySlide: -440, sustainTime: 0.12 },
+  'damage_04': { waveType: 'square', envelopeMode: 'adsr', sustainTime: 0.165, decayTime: 0.095, masterVolume: 0.18, frequencyStart: 164, frequencySlide: -122, vibratoDepth: 23, vibratoSpeed: 9.5, pitchJump1Amount: 160, pitchJump1Onset: 0.1 },
+  'damage_05': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.25, frequencyStart: 500, frequencySlide: -440, sustainTime: 0.12, masterVolume: 0.41 },
 
   '__アイテムゲット系__': null,
   'itemGet_01': { envelopeMode: 'legacy4step', waveType: 'square', notes: [{ freq: 523, duration: 0.05 }, { freq: 784, duration: 0.07 }] },
@@ -420,15 +420,12 @@ const PRESETS = {
   'itemGet_04': { envelopeMode: 'legacy4step', waveType: 'square', duty: 0.25, masterVolume: 0.5, notes: [{ freq: 523, duration: 0.05 }, { freq: 659, duration: 0.07 }] },
   'itemGet_05': { waveType: 'square', sustainTime: 0.15, decayTime: 0.195, masterVolume: 0.36, frequencyStart: 85, duty: 0.25, frequencySlide: 3000, vibratoDepth: 13, vibratoSpeed: 17, pitchJump1Amount: 480, pitchJump1Onset: 0.42, pitchJump2Amount: 800, pitchJump2Onset: 0.28, repeatCount: 2 },
 
-  '__その他系__': null,
-  'other_01': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 440, frequencySlide: 440, sustainTime: 0.05, masterVolume: 0.15 },
-  'other_02': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 440, frequencySlide: -220, sustainTime: 0.05, masterVolume: 0.15 },
-  'other_03': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 660, sustainTime: 0.03, masterVolume: 0.1 },
-  'other_04': { envelopeMode: 'legacy4step', waveType: 'square', frequencyStart: 330, sustainTime: 0.05 },
-  'other_05': { envelopeMode: 'legacy4step', waveType: 'noise', sustainTime: 0.15, masterVolume: 0.4 },
+  '__爆発系__': null,
+  '爆発_01': { waveType: 'sawtooth', envelopeMode: 'adsr', sustainTime: 0.145, decayTime: 0.305, masterVolume: 0.15, frequencyStart: 267, frequencySlide: -1033, repeatCount: 2 },
+  'ポーズ':   { waveType: 'square', envelopeMode: 'legacy4step', sustainTime: 0.1, decayTime: 0.1, masterVolume: 0.5, frequencyStart: 440, duty: 0.25, notes: [{ freq: 523, duration: 0.05 }, { freq: 659, duration: 0.07 }] },
 
   '__特殊__': null,
-  'enemyDefeat': { waveType: 'square', sustainTime: 0, decayTime: 0.08, masterVolume: 0.2, frequencyStart: 600, frequencySlide: -400 },
+  '爆発_02': { waveType: 'square', sustainTime: 0, decayTime: 0.08, masterVolume: 0.2, frequencyStart: 600, frequencySlide: -400 },
 };
 
 // ================================================================
