@@ -114,13 +114,12 @@
 
 <div class="preset-bar">
     <label style="color:var(--dim);">プリセット:</label>
-    <select id="preset"></select>
-    <button class="btn small secondary" onclick="loadPreset()">読込</button>
+    <select id="preset" onchange="loadPreset()"></select>
+    <button class="btn small secondary" onclick="openPasteModal()">📥 JSON読込</button>
   </div>
   <div class="btn-row">
     <button class="btn" onclick="playAll()">▶ 再生</button>
     <button class="btn secondary" onclick="copyAll()">📋 JSONコピー</button>
-    <button class="btn secondary" onclick="openPasteModal()">📥 JSON読込</button>
     <button class="btn small" onclick="randomizeAll()">🎲 ランダム</button>
     <span id="peak-display" class="peak-display">---</span>
   </div>
